@@ -56,14 +56,22 @@ def run(
     settings = _bootstrap(mock)
     targets = load_targets(codes=list(code) if code else None)
     if all_targets and not code:
-        targets = [t for t in load_targets() if t.market.value == "hk"]
+        targets = list(load_targets())
     if not targets:
         typer.secho("未指定目标：请用 --code 00700 或 --all", fg=typer.colors.YELLOW)
         raise typer.Exit(code=1)
 
     names = {t.code: t.name for t in targets}
     keywords = {t.code: t.wfoe_keywords for t in targets}
-    reports = pipeline.run_batch([t.code for t in targets], names=names, keywords=keywords)
+    markets = {t.code: t.market for t in targets}
+    provinces = {t.code: t.province for t in targets}
+    reports = pipeline.run_batch(
+        [t.code for t in targets],
+        names=names,
+        keywords=keywords,
+        markets=markets,
+        provinces=provinces,
+    )
 
     for r in reports:
         color = typer.colors.YELLOW if r.needs_review else typer.colors.GREEN
@@ -98,6 +106,7 @@ def pack(
 
     for target in targets:
         state = pipeline.load_state(target.code, settings)
+        state.market = target.market  # 决定抓取层：港股走 HKEXnews，美股走 SEC EDGAR
         state = pipeline.stage_fetch(state, settings)
         state = pipeline.stage_candidates(
             state, settings, name=target.name, keywords=target.wfoe_keywords

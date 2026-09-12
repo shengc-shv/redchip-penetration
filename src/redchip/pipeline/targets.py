@@ -23,6 +23,7 @@ class Target(BaseModel):
     name: str
     market: Market = Market.HK
     city: str = ""
+    province: str = Field(default="广东省", description="地域过滤目标省份（异地验证可覆盖）")
     wfoe_keywords: list[str] = Field(default_factory=list)
 
 

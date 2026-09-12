@@ -52,6 +52,7 @@ from redchip.models.schema import (
 )
 from redchip.overseas import fts as fts_mod
 from redchip.overseas import hkex as hkex_mod
+from redchip.overseas import sec as sec_mod
 from redchip.verify import crosscheck as verify_mod
 
 _CN_COMPANY_RE = re.compile(r"[\u4e00-\u9fa5A-Za-z0-9（）()·]{2,30}?(?:有限公司|股份有限公司|有限責任公司)")
@@ -72,23 +73,74 @@ def run_hk(
     name: str = "",
     wfoe_keywords: list[str] | None = None,
     settings: config_mod.Settings | None = None,
+    province: str = "广东省",
 ) -> CompanyReport:
     """跑通单家港股企业的完整穿透。
+
+    Args:
+        code: 港股代码。
+        name: 企业中文名。
+        wfoe_keywords: WFOE 检索关键词。
+        settings: 全局配置。
+
+    Returns:
+        CompanyReport: 完整结果。
+    """
+    return run_target(code, Market.HK, name, wfoe_keywords, settings, province)
+
+
+def run_us(
+    code: str,
+    name: str = "",
+    wfoe_keywords: list[str] | None = None,
+    settings: config_mod.Settings | None = None,
+    province: str = "广东省",
+) -> CompanyReport:
+    """跑通单家美股（20-F）企业的完整穿透。
+
+    与港股共用建图 / 广东过滤 / 境内穿透 / UBO / 交叉验证，
+    仅境外抓取层不同（SEC EDGAR 官方 REST API）。
+
+    Args:
+        code: 美股代码，如 ``BABA``。
+        name: 企业中文名（用于境内工商检索）。
+        wfoe_keywords: 境内实体检索关键词（中文）。
+        settings: 全局配置。
+
+    Returns:
+        CompanyReport: 完整结果。
+    """
+    return run_target(code, Market.US, name, wfoe_keywords, settings, province)
+
+
+def run_target(
+    code: str,
+    market: Market = Market.HK,
+    name: str = "",
+    wfoe_keywords: list[str] | None = None,
+    settings: config_mod.Settings | None = None,
+    province: str = "广东省",
+) -> CompanyReport:
+    """按上市地跑通单家企业的完整穿透。
 
     各阶段彼此独立、以 ``output/<code>/state.json`` 传递中间态，
     因此既可整体运行，也可由 GitHub Actions 分步调用（见 scripts/）。
 
     Args:
-        code: 港股代码。
+        code: 股票代码。
+        market: 上市地（港股走 HKEXnews，美股走 SEC EDGAR）。
         name: 企业中文名（用于候选检索与报告标题）。
         wfoe_keywords: WFOE 检索关键词。
         settings: 全局配置；缺省自动载入。
+        province: 地域过滤目标省份（默认广东）。
 
     Returns:
         CompanyReport: 含图谱、UBO、置信度与报告的完整结果。
     """
     cfg = settings or config_mod.get_settings()
     state = load_state(code, cfg)
+    state.market = market
+    state.target_province = province
     state = stage_fetch(state, cfg)
     state = stage_candidates(state, cfg, name=name, keywords=wfoe_keywords)
     state = stage_llm_a(state, cfg, name)
@@ -130,6 +182,32 @@ def _fetch_pages(state: PipelineState, cfg: config_mod.Settings) -> list[hkex_mo
     return pages
 
 
+def _fetch_us_pages(state: PipelineState, cfg: config_mod.Settings) -> list[hkex_mod.PageText]:
+    """抓取 SEC 20-F 并转为分块文本。
+
+    Args:
+        state: 流水线状态。
+        cfg: 全局配置。
+
+    Returns:
+        list[PageText]: 分块文本；mock 模式读 fixture，失败返回空列表。
+    """
+    if cfg.redchip_mock:
+        return _mock_pages(state, cfg)
+    try:
+        filing, html_path, pages = sec_mod.fetch_us_document(
+            state.code, cfg.redchip_data_dir, form="20-F", settings=cfg
+        )
+    except Exception as exc:  # noqa: BLE001 - 抓取失败降级，不阻断流水线
+        state.errors.append(f"SEC EDGAR 抓取失败：{exc}")
+        return []
+    state.doc_kind = filing.form
+    state.doc_url = filing.url
+    state.doc_published_at = filing.filing_date  # SEC 官方申报日期，不使用抓取日兜底
+    state.pdf_path = str(html_path)
+    return pages
+
+
 def _mock_pages(state: PipelineState, cfg: config_mod.Settings) -> list[hkex_mod.PageText]:
     """从 fixture 读取分页文本（离线联调用）。
 
@@ -140,7 +218,8 @@ def _mock_pages(state: PipelineState, cfg: config_mod.Settings) -> list[hkex_mod
     Returns:
         list[PageText]: 分页文本。
     """
-    path = config_mod.FIXTURES_DIR / "hk" / f"{state.code}.json"
+    sub = "us" if state.market == Market.US else "hk"
+    path = config_mod.FIXTURES_DIR / sub / f"{state.code}.json"
     if not path.exists():
         state.errors.append(f"mock 模式缺少 fixture：{path}")
         return []
@@ -415,7 +494,14 @@ def _build_graph_from_llm_a(
     return wfoe_ids
 
 
-def _enrich(graph: Graph, credit_code: str, name: str, province: str, city: str) -> None:
+def _enrich(
+    graph: Graph,
+    credit_code: str,
+    name: str,
+    province: str,
+    city: str,
+    target_province: str = "广东省",
+) -> None:
     """补全节点地域信息。
 
     Args:
@@ -424,12 +510,13 @@ def _enrich(graph: Graph, credit_code: str, name: str, province: str, city: str)
         name: 企业名称。
         province: 省份。
         city: 城市。
+        target_province: 地域过滤目标省份。
     """
     node = graph.nodes.get(credit_code)
     if isinstance(node, CompanyNode):
         node.province = province
         node.city = city
-        if is_guangdong({"province": province, "city": city}):
+        if is_guangdong({"province": province, "city": city}, province=target_province):
             node.kind = EntityKind.WFOE if node.kind == EntityKind.UNKNOWN else node.kind
 
 
@@ -751,13 +838,17 @@ def run_batch(
     codes: list[str],
     names: dict[str, str] | None = None,
     keywords: dict[str, list[str]] | None = None,
+    markets: dict[str, Market] | None = None,
+    provinces: dict[str, str] | None = None,
 ) -> list[CompanyReport]:
-    """批量跑多家企业并生成汇总。
+    """批量跑多家企业并生成汇总（支持港股与美股混合）。
 
     Args:
         codes: 股票代码列表。
         names: 代码 → 中文名。
         keywords: 代码 → WFOE 检索关键词。
+        markets: 代码 → 上市地；缺省按港股处理。
+        provinces: 代码 → 地域过滤目标省份；缺省广东。
 
     Returns:
         list[CompanyReport]: 各家企业的报告。
@@ -765,9 +856,17 @@ def run_batch(
     cfg = config_mod.get_settings()
     reports: list[CompanyReport] = []
     for code in codes:
+        market = (markets or {}).get(code, Market.HK)
+        runner = run_us if market == Market.US else run_hk
         try:
             reports.append(
-                run_hk(code, (names or {}).get(code, ""), (keywords or {}).get(code), cfg)
+                runner(
+                    code,
+                    (names or {}).get(code, ""),
+                    (keywords or {}).get(code),
+                    cfg,
+                    (provinces or {}).get(code, "广东省"),
+                )
             )
         except Exception as exc:  # noqa: BLE001 - 单家失败不影响整批
             reports.append(
@@ -898,7 +997,7 @@ def stage_fetch(state: PipelineState, cfg: config_mod.Settings) -> PipelineState
     Returns:
         PipelineState: 更新后的状态。
     """
-    pages = _fetch_pages(state, cfg)
+    pages = _fetch_us_pages(state, cfg) if state.market == Market.US else _fetch_pages(state, cfg)
     if pages:
         _run_fts(state, pages, cfg)
         if not fts_mod.has_vie_evidence(_index_conn(state, cfg)):
@@ -1030,7 +1129,7 @@ def stage_filter(state: PipelineState, cfg: config_mod.Settings, name: str = "")
     graph = Graph()
     cnbiz = cnbiz_mod.CnbizClient(cfg)
     wfoe_ids = _build_graph_from_llm_a(graph, state.llm_a, state.candidates, cnbiz)
-    matched = filter_guangdong(state.candidates, cnbiz)
+    matched = filter_guangdong(state.candidates, cnbiz, province=state.target_province)
     state.gd_credit_codes = [m.credit_code for m in matched]
     state.ubo_start_ids = wfoe_ids
     graph.save(graph_path(state.code, cfg))
@@ -1052,7 +1151,14 @@ def stage_penetrate(state: PipelineState, cfg: config_mod.Settings) -> PipelineS
     for credit_code in state.gd_credit_codes:
         expand_upward(graph, credit_code, cnbiz, max_depth=6)
         basic = cnbiz.get_company_basic(credit_code)
-        _enrich(graph, credit_code, basic.name, basic.province, basic.city)
+        _enrich(
+            graph,
+            credit_code,
+            basic.name,
+            basic.province,
+            basic.city,
+            target_province=state.target_province,
+        )
     graph.save(graph_path(state.code, cfg))
     return save_state(state, cfg)
 
@@ -1091,7 +1197,7 @@ def stage_ubo(state: PipelineState, cfg: config_mod.Settings, name: str = "") ->
     report = CompanyReport(
         code=state.code,
         name=name or state.llm_a.listed_entity.name,
-        market=Market.HK,
+        market=state.market,
         doc_kind=state.doc_kind,
         doc_url=state.doc_url,
         doc_published_at=state.doc_published_at,
@@ -1161,6 +1267,58 @@ def manual_report_path(code: str, cfg: config_mod.Settings) -> Path:
     return cfg.redchip_output_dir / code / "report.manual.md"
 
 
+def _recall_shareholder_text(state: PipelineState, cfg: config_mod.Settings) -> str:
+    """定向召回股东权益章节（美股 Item 7 / 港股主要股东权益）。
+
+    与架构章节分开召回，避免两者互相挤占 token 预算。
+
+    Args:
+        state: 流水线状态。
+        cfg: 全局配置。
+
+    Returns:
+        str: 命中文本；索引不存在时返回空串。
+    """
+    index_path = cfg.redchip_data_dir / "index" / f"{state.code}.sqlite"
+    if not index_path.exists():
+        return ""
+    import sqlite3
+
+    conn = sqlite3.connect(index_path)
+    hits = fts_mod.search(conn, keywords=verify_mod.SHAREHOLDER_KEYWORDS, max_tokens=2000)
+    return fts_mod.render_hits(hits)
+
+
+# VIE 实体名单的定向召回关键词：20-F 的 Item 4.C 会列出「representative VIEs」及其指定持股自然人
+_VIE_ENTITY_KEYWORDS: tuple[str, ...] = (
+    "representative VIE",
+    "Enhanced VIE Structure",
+    "Network Co., Ltd.",
+    "designated individuals",
+    "variable interest entities",
+)
+
+
+def _recall_vie_entity_text(state: PipelineState, cfg: config_mod.Settings) -> str:
+    """定向召回 VIE 实体名单与其指定持股自然人。
+
+    Args:
+        state: 流水线状态。
+        cfg: 全局配置。
+
+    Returns:
+        str: 命中文本；索引不存在时返回空串。
+    """
+    index_path = cfg.redchip_data_dir / "index" / f"{state.code}.sqlite"
+    if not index_path.exists():
+        return ""
+    import sqlite3
+
+    conn = sqlite3.connect(index_path)
+    hits = fts_mod.search(conn, keywords=_VIE_ENTITY_KEYWORDS, max_tokens=2000)
+    return fts_mod.render_hits(hits)
+
+
 def stage_pack(state: PipelineState, cfg: config_mod.Settings, name: str = "") -> Path:
     """导出 LLM 分析包：把需要交给 LLM 的全部输入固化成 JSON + 可读 Markdown。
 
@@ -1190,6 +1348,8 @@ def stage_pack(state: PipelineState, cfg: config_mod.Settings, name: str = "") -
         "fts_hits": state.fts_hits,
         "fts_text": state.fts_text,
         "candidates": [c.model_dump() for c in state.candidates],
+        "shareholder_text": _recall_shareholder_text(state, cfg),
+        "vie_entity_text": _recall_vie_entity_text(state, cfg),
         "prompts": {
             "llm_a": llm_mod.load_prompt("llm_a.md"),
             "llm_b": llm_mod.load_prompt("llm_b.md"),
@@ -1226,13 +1386,21 @@ def stage_pack(state: PipelineState, cfg: config_mod.Settings, name: str = "") -
 | --- | --- | --- | --- | --- |
 {candidates_md}
 
-## 四、LLM-A Prompt
+## 四、股东权益章节（定向召回）
+
+{pack['shareholder_text'] or '（未召回）'}
+
+## 五、VIE 实体名单（定向召回）
+
+{pack['vie_entity_text'] or '（未召回）'}
+
+## 六、LLM-A Prompt
 
 ```text
 {pack['prompts']['llm_a']}
 ```
 
-## 五、产物回填路径
+## 七、产物回填路径
 - `output/{state.code}/llm_a.manual.json` —— 严格按上述 Schema 输出
 - `output/{state.code}/report.manual.md` —— 严格按 llm_b Prompt 的分节输出
 """

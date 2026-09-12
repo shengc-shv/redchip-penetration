@@ -357,5 +357,7 @@ class PipelineState(BaseModel):
     gd_credit_codes: list[str] = Field(default_factory=list)
     # UBO 穿透的起点节点 id
     ubo_start_ids: list[str] = Field(default_factory=list)
+    # 地域过滤目标省份（默认广东；美股等异地验证可覆盖）
+    target_province: str = "广东省"
     report: CompanyReport | None = None
     errors: list[str] = Field(default_factory=list)

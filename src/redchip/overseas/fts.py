@@ -48,6 +48,20 @@ DEFAULT_KEYWORDS: tuple[str, ...] = (
     "corporate structure",
     "最终受益人",
     "实际控制人",
+    # 美股 20-F（英文披露）常用表述
+    "Organizational Structure",
+    "representative VIE",
+    "Enhanced VIE Structure",
+    "PRC subsidiaries",
+    "primary beneficiary",
+    "variable interest entities",
+    "consolidated affiliated entities",
+    "nominee shareholder",
+    "contractual arrangements with",
+    # VIE 名单 / 实体清单所在段落通常密集出现公司全称
+    "Co., Ltd.",
+    "designated individuals",
+    "equity interest holders",
 )
 
 # VIE 专属关键词：命中数为 0 时可跳过协议提取环节，节省约 2k token
@@ -59,6 +73,19 @@ VIE_KEYWORDS: tuple[str, ...] = (
     "VIE",
     "contractual arrangements",
     "structured contracts",
+)
+
+
+# 架构与股东证据的信号词：命中即加分，确保这些块优先进入 token 预算
+# （20-F 的 Risk Factors 章节同样高频出现 VIE，但不含架构主体信息）
+BOOST_KEYWORDS: tuple[str, ...] = (
+    "Organizational Structure",
+    "corporate structure",
+    "representative VIE",
+    "Enhanced VIE Structure",
+    "Major Shareholders",
+    "主要股东权益",
+    "contractual arrangements with",
 )
 
 
@@ -167,10 +194,16 @@ def search(
 
     bodies = {int(r[0]): r[1] for r in conn.execute("SELECT no, body FROM plain").fetchall()}
 
+    def _score(page_no: int, kws: list[str]) -> int:
+        base = len(kws)
+        body = bodies.get(page_no, "")
+        boost = sum(3 for b in BOOST_KEYWORDS if b.lower() in body.lower())
+        return base + boost
+
     hits = [
         FtsHit(
             page_no=page_no,
-            score=len(kws),
+            score=_score(page_no, kws),
             keywords=sorted(set(kws)),
             snippet=_make_snippet(bodies.get(page_no, ""), kws[0], snippet_chars),
         )

@@ -42,24 +42,33 @@ GUANGDONG_CITIES: frozenset[str] = frozenset(
 )
 
 
-def is_guangdong(basic: CompanyBasic | dict[str, object] | None) -> bool:
-    """判断是否属于广东省内主体。
+def is_guangdong(
+    basic: CompanyBasic | dict[str, object] | None,
+    province: str = "广东省",
+    cities: frozenset[str] = GUANGDONG_CITIES,
+) -> bool:
+    """判断是否属于目标省份内的主体。
+
+    默认广东省（项目聚焦），可按目标企业覆盖（如美股验证用浙江省），
+    过滤逻辑与位置不变：仍在 LLM-A 消歧之后执行。
 
     Args:
         basic: 企业基本信息（含 province / city）。
+        province: 目标省份名。
+        cities: 目标省份下辖城市名集合。
 
     Returns:
-        bool: 广东省内返回 True。
+        bool: 属于目标省份返回 True。
     """
     if basic is None:
         return False
     if isinstance(basic, dict):
-        province = str(basic.get("province") or "")
+        prov = str(basic.get("province") or "")
         city = str(basic.get("city") or "")
     else:
-        province = basic.province or ""
+        prov = basic.province or ""
         city = basic.city or ""
-    return province == "广东省" or city in GUANGDONG_CITIES
+    return prov == province or city in cities
 
 
 @dataclass
@@ -99,23 +108,28 @@ def collect_candidates(
 
 
 def filter_guangdong(
-    candidates: list[CandidateCompany], client: CnbizClient
+    candidates: list[CandidateCompany],
+    client: CnbizClient,
+    province: str = "广东省",
+    cities: frozenset[str] = GUANGDONG_CITIES,
 ) -> list[MatchedEntity]:
     """在 LLM-A 消歧之后执行地域过滤。
 
     Args:
         candidates: 全量候选。
         client: 工商客户端。
+        province: 目标省份名。
+        cities: 目标省份下辖城市名集合。
 
     Returns:
-        list[MatchedEntity]: 广东省内的实体（保留全量候选用于审计）。
+        list[MatchedEntity]: 目标省份内的实体（保留全量候选用于审计）。
     """
     matched: list[MatchedEntity] = []
     for cand in candidates:
         if not cand.credit_code:
             continue
         basic = client.get_company_basic(cand.credit_code)
-        if is_guangdong(basic):
+        if is_guangdong(basic, province=province, cities=cities):
             matched.append(
                 MatchedEntity(candidate=cand, basic=basic, credit_code=cand.credit_code)
             )

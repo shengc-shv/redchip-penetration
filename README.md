@@ -3,7 +3,8 @@
 自动抓取**港股**（阶段二扩展美股）红筹架构企业的披露文件，完成股权穿透、VIE 协议识别、
 UBO 判定与 LLM 解读，输出穿透路径图与中文分析报告。运行时为 GitHub Actions，无需服务器。
 
-当前状态：**港股模块已完成并通过离线端到端验证**；美股模块为阶段二，已预留接口骨架。
+当前状态：**港股、美股两个模块均已完成**，并分别用腾讯控股（00700，离线样例）与
+阿里巴巴（BABA，真实 20-F）端到端验证通过。
 
 ## 与参考方案的两处重要偏差
 
@@ -11,6 +12,7 @@ UBO 判定与 LLM 解读，输出穿透路径图与中文分析报告。运行�
 | --- | --- | --- |
 | 港股端用 `ah-disclosure-kit` | **该包在 PyPI 上不存在**（`pypi.org/simple/ah-disclosure-kit/` 返回 404） | 自研 `redchip/overseas/hkex.py`，直接对接 HKEXnews 官方接口（`prefix.do` → `titleSearchServlet.do` → PDF → `pypdf` 分页），已实测可用（00700 → stockId 7609） |
 | PNG 依赖 `neo4j-graphviz`（npm） | 该包依赖 Node + Graphviz，链路长且易失败 | 渲染层自带三层降级：**Graphviz PNG**（有 `dot` 时）→ **零依赖 SVG** → **DOT / Mermaid** 源文件，任何环境都能出图 |
+| 美股端用 `edgartools` | 该库在本环境安装不稳定（pip 进程被中断） | 用 **SEC 官方 REST API** 直连（`company_tickers.json` → `submissions/CIK*.json` → Archives 原文），零第三方依赖，已实测 BABA：CIK 1577552、12 份 20-F、最新一份 11.7MB HTML |
 
 其余设计（Token 预算、两次 LLM 调用、广东过滤位置、置信度权重、Neo4j Service Container）
 均按方案文档落地。
@@ -33,7 +35,8 @@ UBO 判定与 LLM 解读，输出穿透路径图与中文分析报告。运行�
 ├── src/redchip/
 │   ├── config.py                      # 配置与 Secrets 变量名（含 Token 预算参数）
 │   ├── models/                        # Pydantic 数据契约 + 置信度评分
-│   ├── overseas/                      # hkex（港股）/ fts（FTS5 trigram）/ sec（阶段二）
+│   ├── overseas/                      # hkex（港股）/ sec（美股 20-F）/ fts（FTS5 trigram）
+│   ├── verify/                        # 交叉验证器：披露口径 ↔ 工商登记口径
 │   ├── domestic/                      # cnbiz（工商 API）/ penetration（穿透 + 广东过滤）
 │   ├── graph/                         # store（图）/ ubo（穿透算法）/ render（渲染）
 │   ├── llm/                           # client（OpenAI 兼容）+ prompts/
@@ -54,7 +57,10 @@ python -m redchip.cli run --code 00700 --mock
 cp .env.example .env   # 填入 CNBIZAPI_KEY / LLM_API_KEY 等
 python -m redchip.cli run --code 00700
 
-# 3) 批量跑 config/targets.yaml 中的全部港股
+# 3) 美股（20-F）
+python -m redchip.cli run --code BABA
+
+# 4) 批量跑 config/targets.yaml 中的全部目标（港股 + 美股）
 python -m redchip.cli run --all
 
 # 单独重绘图（不需要重跑流水线）
@@ -104,6 +110,20 @@ output/summary.md              # 批量运行汇总
 output/llm_raw/                # LLM 原始返回（审计与 Prompt 迭代用）
 ```
 
+## 准确性核准：交叉验证器
+
+单靠一份披露文件判 UBO 风险很高，因此流水线内置交叉核对（`src/redchip/verify/`）：
+
+| 校验器 | 逻辑 |
+| --- | --- |
+| 披露 ↔ 登记比例对比 | 年报「主要股东权益」章节是《证券及期货条例》第XV部申报数据的法定镜像，与工商登记按姓名对齐，偏差 >±2% 记 error |
+| 合计校验 | 登记股东比例之和应 ≈100%（容差 ±0.5%），否则股东名册不完整 |
+| 离岸股东提示 | 披露有、工商无的股东记 info 级，不误伤通过状态 |
+
+error 级问题会拉低置信度的「多源一致性」维度并写入需人工复核原因。
+注：港交所 DI 系统直连不可用（旧接口 302 弃用、新页面对部分网络不可用），
+故改以年报法定章节 + 披露易申报表（实测 146/200 条为第XV部申报表）作为同一权威口径的来源。
+
 ## 关键设计
 
 - **Token 预算**：FTS 只取命中「合约安排 / VIE / 股权架构」等关键词的段落（默认 6k），
@@ -114,10 +134,16 @@ output/llm_raw/                # LLM 原始返回（审计与 Prompt 迭代用�
   否则可能提前剔除正确实体。零额外 token。
 - **时间真实性**：披露文件发布时间只取官方 `DATE_TIME` 字段，**不使用抓取日期兜底**；
   解析失败时该字段留空并在时效性维度按中性值计分。
+- **美股差异**：20-F 为英文，FTS 关键词含英文表述（contractual arrangements / variable interest /
+  Organizational Structure / representative VIE 等），且对架构与股东类信号词加权，
+  避免 Risk Factors 章节挤占 6k token 预算；地域过滤默认广东，可按目标配置省份
+  （BABA 配置为浙江省以便验证完整穿透）。
 - **降级策略**：抓取 / LLM / 图库 / PNG 任一环节失败都只记入 `errors` 并标记需人工复核，
   不阻断后续步骤（Actions 中 LLM 步骤设 `continue-on-error: true`）。
 
 ## 阶段规划
 
-- [x] 港股：HKEXnews 抓取、FTS 检索、LLM-A/B、广东过滤、境内穿透、UBO、渲染
-- [ ] 美股：EdgarTools 抓取 20-F（`src/redchip/overseas/sec.py` 已留骨架与调用要点）
+- [x] 港股：HKEXnews 抓取、FTS 检索、LLM-A/B、地域过滤、境内穿透、UBO、交叉验证、渲染
+- [x] 美股：SEC EDGAR 官方 API 抓取 20-F（ticker → CIK → 申报列表 → 原文 → 分块 → FTS），
+      复用全部下游阶段；已用 BABA 真实数据验证
+- [ ] 20-F 英文股东表解析器（Item 7），补齐美股侧的披露 ↔ 登记交叉验证

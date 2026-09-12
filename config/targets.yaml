@@ -58,3 +58,11 @@ targets:
     market: hk
     city: 佛山
     wfoe_keywords: ["中国中药", "天江药业"]
+
+  # ===== 美股（阶段二，20-F）=====
+  - code: "BABA"
+    name: 阿里巴巴
+    market: us
+    city: 杭州
+    province: 浙江省
+    wfoe_keywords: ["阿里巴巴", "淘宝", "天猫"]

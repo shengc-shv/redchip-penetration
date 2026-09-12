@@ -29,6 +29,11 @@ SHAREHOLDER_KEYWORDS: tuple[str, ...] = (
     "股东名册",
     "股東名冊",
     "大股东权益",
+    # 美股 20-F（英文披露）
+    "Major Shareholders",
+    "beneficially owned",
+    "share ownership",
+    "Principal Shareholders",
 )
 
 # 「名称 + 持股百分比」抽取：
@@ -38,6 +43,10 @@ _HOLDER_RE = re.compile(
     r"([\u4e00-\u9fa5A-Za-z·]{2,12})(?:先生|女士|小姐)?\s*[(（:：]?\s*(\d{1,3}(?:\.\d{1,2})?)\s*%"
 )
 _SUMMARY_WORDS = ("合计", "總計", "总计", "total", "小计", "约", "其余")
+# 英文虚词与常见动词：英文披露中「and 1%」「was 8.8%」会被中文抽取器误判为股东名
+_EN_STOPWORDS = frozenset(
+    ["and", "or", "the", "of", "in", "to", "for", "as", "by", "with", "was", "were", "are", "is", "been", "being", "representing", "representing", "accordingly", "approximately", "respectively", "including", "excluded", "less", "more", "than", "about", "over", "under", "each", "such", "other", "which", "that", "this", "these", "those", "from", "at", "on", "our", "its", "their", "his", "her", "not", "no", "all", "any", "per", "due", "may", "will", "would", "could", "should"]
+)
 # 称谓后缀：name 组是贪婪汉字匹配，会把「先生/女士」一并吞掉，提取后统一剥离
 _HONORIFIC_SUFFIX_RE = re.compile(r"(先生|女士|小姐|Mr\.?|Ms\.?|Mrs\.?)$")
 
@@ -86,7 +95,11 @@ def extract_disclosed_holders(text: str, source_page: str = "") -> list[Disclose
         raw_name = match.group(1).strip()
         pct_text = match.group(2)
         # 汇总行（合计/total）与其余、约数表述不是具体股东
-        if any(w in raw_name.lower() for w in _SUMMARY_WORDS):
+        lowered = raw_name.lower()
+        if any(w in lowered for w in _SUMMARY_WORDS):
+            continue
+        # 纯英文虚词（and/was/representing…）不是股东名
+        if lowered in _EN_STOPWORDS:
             continue
         name = re.sub(r"[，。；、\s]+$", "", raw_name)
         name = _HONORIFIC_SUFFIX_RE.sub("", name)

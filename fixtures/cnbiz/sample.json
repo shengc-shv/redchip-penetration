@@ -1,5 +1,5 @@
 {
-  "_note": "离线联调样例数据（未配置 CNBizAPI_KEY 或 REDCHIP_MOCK=true 时使用）。企业基本信息为公开工商登记风格的示意数据，持股比例仅用于验证穿透算法，实际以 CNBizAPI 实时返回为准。",
+  "_note": "离线联调样例数据（未配置 CNBizAPI_KEY 或 REDCHIP_MOCK=true 时使用）。企业基本信息为公开工商登记风格的示意数据，持股比例仅用于验证穿透算法，实际以 CNBizAPI 实时返回为准。 阿里系 VIE 实体登记股东采用 20-F FY2026 披露的「指定持股自然人」真实姓名，持股比例为等额示例口径。",
   "candidates": [
     {
       "name": "腾讯科技（深圳）有限公司",
@@ -21,6 +21,34 @@
       "business_scope": "技术服务、技术开发、云计算设备销售",
       "province": "北京市",
       "city": "北京市"
+    },
+    {
+      "name": "阿里巴巴（中国）有限公司",
+      "credit_code": "91330100799655058B",
+      "business_scope": "计算机软硬件、网络技术开发；企业管理咨询；批发零售",
+      "province": "浙江省",
+      "city": "杭州市"
+    },
+    {
+      "name": "淘宝（中国）软件有限公司",
+      "credit_code": "913301007682254698",
+      "business_scope": "计算机软件研发、销售；网络技术服务",
+      "province": "浙江省",
+      "city": "杭州市"
+    },
+    {
+      "name": "浙江淘宝网络有限公司",
+      "credit_code": "91330100776620589G",
+      "business_scope": "互联网信息服务；增值电信业务；网络平台运营",
+      "province": "浙江省",
+      "city": "杭州市"
+    },
+    {
+      "name": "浙江天猫网络有限公司",
+      "credit_code": "91330100560565423X",
+      "business_scope": "互联网信息服务；增值电信业务；网络平台运营",
+      "province": "浙江省",
+      "city": "杭州市"
     }
   ],
   "companies": {
@@ -53,10 +81,34 @@
       "business_scope": "计算机软硬件技术开发；增值电信业务经营",
       "legal_person": "马化腾",
       "shareholders": [
-        { "name": "马化腾", "kind": "person", "credit_code": "", "share_pct": 54.29, "share_raw": "54.29%" },
-        { "name": "张志东", "kind": "person", "credit_code": "", "share_pct": 22.86, "share_raw": "22.86%" },
-        { "name": "陈一丹", "kind": "person", "credit_code": "", "share_pct": 11.43, "share_raw": "11.43%" },
-        { "name": "许晨晔", "kind": "person", "credit_code": "", "share_pct": 11.42, "share_raw": "11.42%" }
+        {
+          "name": "马化腾",
+          "kind": "person",
+          "credit_code": "",
+          "share_pct": 54.29,
+          "share_raw": "54.29%"
+        },
+        {
+          "name": "张志东",
+          "kind": "person",
+          "credit_code": "",
+          "share_pct": 22.86,
+          "share_raw": "22.86%"
+        },
+        {
+          "name": "陈一丹",
+          "kind": "person",
+          "credit_code": "",
+          "share_pct": 11.43,
+          "share_raw": "11.43%"
+        },
+        {
+          "name": "许晨晔",
+          "kind": "person",
+          "credit_code": "",
+          "share_pct": 11.42,
+          "share_raw": "11.42%"
+        }
       ]
     },
     "91110108551385082Q": {
@@ -74,6 +126,120 @@
           "credit_code": "91440300708461136T",
           "share_pct": 100.0,
           "share_raw": "100%"
+        }
+      ]
+    },
+    "91330100799655058B": {
+      "name": "阿里巴巴（中国）有限公司",
+      "credit_code": "91330100799655058B",
+      "province": "浙江省",
+      "city": "杭州市",
+      "reg_status": "存续",
+      "established_at": "2007-03-26",
+      "business_scope": "计算机软硬件、网络技术开发",
+      "shareholders": [
+        {
+          "name": "Alibaba.com China Limited",
+          "kind": "company",
+          "credit_code": "",
+          "share_pct": 100.0,
+          "share_raw": "100%"
+        }
+      ]
+    },
+    "913301007682254698": {
+      "name": "淘宝（中国）软件有限公司",
+      "credit_code": "913301007682254698",
+      "province": "浙江省",
+      "city": "杭州市",
+      "reg_status": "存续",
+      "established_at": "2004-11-15",
+      "business_scope": "计算机软件研发、销售",
+      "shareholders": [
+        {
+          "name": "Alibaba.com China Limited",
+          "kind": "company",
+          "credit_code": "",
+          "share_pct": 100.0,
+          "share_raw": "100%"
+        }
+      ]
+    },
+    "91330100776620589G": {
+      "name": "浙江淘宝网络有限公司",
+      "credit_code": "91330100776620589G",
+      "province": "浙江省",
+      "city": "杭州市",
+      "reg_status": "存续",
+      "established_at": "2003-09-04",
+      "business_scope": "互联网信息服务；增值电信业务",
+      "shareholders": [
+        {
+          "name": "郑俊芳",
+          "kind": "person",
+          "credit_code": "",
+          "share_pct": 25.0,
+          "share_raw": "25%"
+        },
+        {
+          "name": "邵晓锋",
+          "kind": "person",
+          "credit_code": "",
+          "share_pct": 25.0,
+          "share_raw": "25%"
+        },
+        {
+          "name": "吴泽明",
+          "kind": "person",
+          "credit_code": "",
+          "share_pct": 25.0,
+          "share_raw": "25%"
+        },
+        {
+          "name": "蒋方",
+          "kind": "person",
+          "credit_code": "",
+          "share_pct": 25.0,
+          "share_raw": "25%"
+        }
+      ]
+    },
+    "91330100560565423X": {
+      "name": "浙江天猫网络有限公司",
+      "credit_code": "91330100560565423X",
+      "province": "浙江省",
+      "city": "杭州市",
+      "reg_status": "存续",
+      "established_at": "2010-10-25",
+      "business_scope": "互联网信息服务；增值电信业务",
+      "shareholders": [
+        {
+          "name": "郑俊芳",
+          "kind": "person",
+          "credit_code": "",
+          "share_pct": 25.0,
+          "share_raw": "25%"
+        },
+        {
+          "name": "邵晓锋",
+          "kind": "person",
+          "credit_code": "",
+          "share_pct": 25.0,
+          "share_raw": "25%"
+        },
+        {
+          "name": "吴泽明",
+          "kind": "person",
+          "credit_code": "",
+          "share_pct": 25.0,
+          "share_raw": "25%"
+        },
+        {
+          "name": "蒋方",
+          "kind": "person",
+          "credit_code": "",
+          "share_pct": 25.0,
+          "share_raw": "25%"
         }
       ]
     }
