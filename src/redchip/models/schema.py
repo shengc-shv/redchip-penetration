@@ -320,6 +320,8 @@ class CompanyReport(BaseModel):
 
     is_guangdong: bool = False
     guangdong_entities: list[str] = Field(default_factory=list)
+    # 交叉验证结果（CrosscheckResult 的 dump），供报告与下游消费
+    crosscheck: dict[str, Any] = Field(default_factory=dict)
     needs_review: bool = False
     review_reasons: list[str] = Field(default_factory=list)
 

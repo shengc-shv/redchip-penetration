@@ -52,6 +52,7 @@ from redchip.models.schema import (
 )
 from redchip.overseas import fts as fts_mod
 from redchip.overseas import hkex as hkex_mod
+from redchip.verify import crosscheck as verify_mod
 
 _CN_COMPANY_RE = re.compile(r"[\u4e00-\u9fa5A-Za-z0-9（）()·]{2,30}?(?:有限公司|股份有限公司|有限責任公司)")
 
@@ -93,6 +94,7 @@ def run_hk(
     state = stage_llm_a(state, cfg, name)
     state = stage_build(state, cfg, name)
     state = stage_llm_b(state, cfg)
+    stage_crosscheck(state, cfg)
     stage_export(state, cfg)
     return load_report(code, cfg) or CompanyReport(code=code)
 
@@ -514,6 +516,19 @@ def _fallback_report(report: CompanyReport, graph: Graph) -> str:
         or "- 未穿透到满足 25% 阈值的自然人"
     )
     gd = "、".join(report.guangdong_entities) or "未识别到广东省内实体"
+    cc = report.crosscheck or {}
+    cc_lines = (
+        "\n".join(
+            f"- {i.get('detail')}（{'⚠️' if i.get('severity') == 'error' else 'ℹ️'}）"
+            for i in cc.get("issues", [])
+        )
+        or "- 披露口径与工商登记口径核对一致，未发现问题"
+    )
+    disclosed = cc.get("disclosed", [])
+    disclosed_md = (
+        "、".join(f"{h['name']} {h['share_pct']:g}%（p.{h.get('source_page') or '?'}）" for h in disclosed)
+        or "未召回股东权益章节"
+    )
     return f"""# {report.name}（{report.code}）红筹架构穿透报告
 
 > 自动生成于 {report.generated_at}｜置信度 {report.confidence.total}｜{"⚠️ 需人工复核" if report.needs_review else "✅ 自动通过"}
@@ -537,6 +552,11 @@ def _fallback_report(report: CompanyReport, graph: Graph) -> str:
 ### 架构特点
 - 节点 {len(report.nodes)} 个，股权边 {len(report.owns)} 条，协议控制边 {len(report.controls)} 条
 - {"存在 VIE 协议控制结构" if report.controls else "未识别到 VIE 协议控制"}
+
+### 交叉验证（披露口径 ↔ 工商登记口径）
+- 披露口径（第XV部镜像）：{disclosed_md}
+- 核对结果：
+{cc_lines}
 
 ### 风险提示
 - 离岸层（开曼/BVI）股东名册不公开，穿透存在天然断点
@@ -1219,3 +1239,50 @@ def stage_pack(state: PipelineState, cfg: config_mod.Settings, name: str = "") -
     path = out_dir / "llm_pack.md"
     path.write_text(md, encoding="utf-8")
     return path
+
+
+def stage_crosscheck(state: PipelineState, cfg: config_mod.Settings) -> PipelineState:
+    """阶段七：披露口径 ↔ 工商登记口径交叉核对。
+
+    - 年报「主要股东权益」章节是《证券及期货条例》第XV部申报数据的法定镜像，
+      无需直连 DI 系统（旧接口已弃用）即可获得同一权威口径；
+    - 登记股东合计校验：比例之和应 ≈ 100%；
+    - error 级问题写入需人工复核原因并拉低一致性得分。
+
+    Args:
+        state: 流水线状态。
+        cfg: 全局配置。
+
+    Returns:
+        PipelineState: 更新后的状态。
+    """
+    report = load_report(state.code, cfg)
+    if report is None:
+        state.errors.append("交叉验证前置结果缺失，请先执行 stage_ubo")
+        return save_state(state, cfg)
+    graph = Graph.load(graph_path(state.code, cfg))
+
+    # 用股东权益关键词再做一次定向召回（与架构关键词分开，避免互相挤占预算）
+    index_path = cfg.redchip_data_dir / "index" / f"{state.code}.sqlite"
+    if index_path.exists():
+        import sqlite3
+
+        conn = sqlite3.connect(index_path)
+        hits = fts_mod.search(conn, keywords=verify_mod.SHAREHOLDER_KEYWORDS, max_tokens=3000)
+        fts_payload = [h.model_dump() for h in hits]
+        state.fts_hits = state.fts_hits or fts_payload
+    else:
+        fts_payload = []
+
+    from redchip.verify import crosscheck as cc_mod
+
+    cc = cc_mod.crosscheck(report, graph, fts_payload, cfg)
+
+    result_path(state.code, cfg).write_text(
+        json.dumps(report.model_dump(mode="json"), ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    print(
+        f"{state.code} 交叉验证：披露口径 {len(cc.disclosed)} 条，"
+        f"问题 {len(cc.issues)} 项（{'通过' if cc.passed else '需复核'}）"
+    )
+    return save_state(state, cfg)
