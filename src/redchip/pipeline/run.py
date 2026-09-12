@@ -210,6 +210,16 @@ def _run_llm_a(
     ) or "（无候选）"
 
     client = llm_mod.LLMClient(cfg)
+
+    # 本地分析结果优先：若存在 llm_a.manual.json，视为「按 Prompt 由本地分析产出」的结果，
+    # 直接采用且不再标记需人工复核。这样无 API Key 也能得到高质量输出。
+    manual = manual_llm_a_path(state.code, cfg)
+    if manual.exists():
+        try:
+            return LlmAOutput.model_validate(json.loads(manual.read_text(encoding="utf-8")))
+        except Exception as exc:  # noqa: BLE001
+            state.errors.append(f"本地分析结果 {manual.name} 解析失败：{exc}")
+
     if not client.is_available():
         fallback = _fallback_llm_a(state, company_name)
         fallback.needs_review = True
@@ -369,8 +379,13 @@ def _build_graph_from_llm_a(
     for contract in llm_a.vie_contracts:
         if not contract.party_b:
             continue
+        # 运营实体若能在工商候选中命中，直接用信用代码作为节点 id，
+        # 与后续境内穿透使用同一实体，避免被拆成「名称节点 + 信用代码节点」两个。
         opco = graph.add_company(
-            name=contract.party_b, jurisdiction=Jurisdiction.CN, kind=EntityKind.OPCO
+            name=contract.party_b,
+            jurisdiction=Jurisdiction.CN,
+            kind=EntityKind.OPCO,
+            credit_code=_candidate_code(candidates, contract.party_b),
         )
         wfoe_name = contract.party_a or (llm_a.wfoe[0].name if llm_a.wfoe else "")
         wfoe_node = _find_by_name(graph, wfoe_name) if wfoe_name else None
@@ -430,6 +445,11 @@ def _run_llm_b(
     Returns:
         str: Markdown 报告；不可用时返回空串（调用方用兜底报告）。
     """
+    # 本地分析报告优先（与 llm_a.manual.json 配套）
+    manual = manual_report_path(state.code, cfg)
+    if manual.exists():
+        return _extract_mermaid(manual.read_text(encoding="utf-8"), report)
+
     client = llm_mod.LLMClient(cfg)
     if not client.is_available():
         return ""
@@ -655,6 +675,27 @@ def _kind_by_jurisdiction(value: str) -> EntityKind:
     if jur == Jurisdiction.CN:
         return EntityKind.OPCO
     return EntityKind.UNKNOWN
+
+
+def _candidate_code(candidates: list[CandidateCompany], name: str) -> str | None:
+    """按企业名在候选列表中查找统一社会信用代码。
+
+    Args:
+        candidates: 工商候选列表。
+        name: 企业名称。
+
+    Returns:
+        str | None: 命中的信用代码；未命中返回 None。
+    """
+    if not name:
+        return None
+    for cand in candidates:
+        if cand.name == name and cand.credit_code:
+            return cand.credit_code
+    for cand in candidates:
+        if cand.credit_code and (name in cand.name or cand.name in name):
+            return cand.credit_code
+    return None
 
 
 def _find_by_name(graph: Graph, name: str) -> CompanyNode | None:
@@ -944,7 +985,11 @@ def stage_export(state: PipelineState, cfg: config_mod.Settings) -> dict[str, Pa
     """
     out_dir = cfg.redchip_output_dir / state.code
     graph = Graph.load(graph_path(state.code, cfg))
-    produced = render_mod.render_all(graph, out_dir)
+    report = load_report(state.code, cfg)
+    title = f"{report.name or state.code}（{state.code}）红筹架构穿透图" if report else "红筹架构穿透图"
+    produced = render_mod.render_all(
+        graph, out_dir, ubos=report.ubos if report else None, title=title
+    )
     graph.sync_neo4j()
     return produced
 
@@ -1063,3 +1108,114 @@ def stage_ubo(state: PipelineState, cfg: config_mod.Settings, name: str = "") ->
         json.dumps(state.llm_a.model_dump(), ensure_ascii=False, indent=2), encoding="utf-8"
     )
     return save_state(state, cfg)
+
+
+# ---------------------------------------------------------------------------
+# 本地分析支持：把 LLM 的输入固化成分析包，并允许回填分析结果
+# ---------------------------------------------------------------------------
+
+
+def manual_llm_a_path(code: str, cfg: config_mod.Settings) -> Path:
+    """返回「本地分析产出的 LLM-A 结果」路径。
+
+    Args:
+        code: 股票代码。
+        cfg: 全局配置。
+
+    Returns:
+        Path: ``output/<code>/llm_a.manual.json``。
+    """
+    return cfg.redchip_output_dir / code / "llm_a.manual.json"
+
+
+def manual_report_path(code: str, cfg: config_mod.Settings) -> Path:
+    """返回「本地分析产出的报告」路径。
+
+    Args:
+        code: 股票代码。
+        cfg: 全局配置。
+
+    Returns:
+        Path: ``output/<code>/report.manual.md``。
+    """
+    return cfg.redchip_output_dir / code / "report.manual.md"
+
+
+def stage_pack(state: PipelineState, cfg: config_mod.Settings, name: str = "") -> Path:
+    """导出 LLM 分析包：把需要交给 LLM 的全部输入固化成 JSON + 可读 Markdown。
+
+    用途：在没有 API Key（或不希望调用外部模型）时，把材料导出后由本地完成分析，
+    再把结果写回 ``llm_a.manual.json`` / ``report.manual.md``，流水线会优先采用。
+
+    Args:
+        state: 流水线状态。
+        cfg: 全局配置。
+        name: 企业中文名。
+
+    Returns:
+        Path: 分析包 Markdown 路径。
+    """
+    out_dir = cfg.redchip_output_dir / state.code
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    pack = {
+        "code": state.code,
+        "name": name,
+        "market": "hk",
+        "doc": {
+            "kind": state.doc_kind,
+            "url": state.doc_url,
+            "published_at": state.doc_published_at,
+        },
+        "fts_hits": state.fts_hits,
+        "fts_text": state.fts_text,
+        "candidates": [c.model_dump() for c in state.candidates],
+        "prompts": {
+            "llm_a": llm_mod.load_prompt("llm_a.md"),
+            "llm_b": llm_mod.load_prompt("llm_b.md"),
+        },
+        "output_contract": {
+            "llm_a": "写回 output/<code>/llm_a.manual.json（严格遵循 prompts.llm_a 的 JSON Schema）",
+            "llm_b": "写回 output/<code>/report.manual.md（严格遵循 prompts.llm_b 的分节格式）",
+        },
+    }
+    (out_dir / "llm_pack.json").write_text(
+        json.dumps(pack, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+    candidates_md = "\n".join(
+        f"| {i} | {c.name} | {c.credit_code or '—'} | {c.province or '—'}/{c.city or '—'} | "
+        f"{c.business_scope[:60]} |"
+        for i, c in enumerate(state.candidates)
+    ) or "| — | 无候选 | — | — | — |"
+
+    md = f"""# 红筹架构分析包：{state.code} {name}
+
+## 一、披露文件
+- 类型：{state.doc_kind or '未知'}
+- 发布：{state.doc_published_at or '未知'}
+- 链接：{state.doc_url or '—'}
+
+## 二、命中段落（FTS 检索自招股书/年报，已按 6k token 预算裁剪）
+
+{state.fts_text or '（无）'}
+
+## 三、境内 WFOE 候选（CNBizAPI，已裁剪字段）
+
+| # | 名称 | 统一社会信用代码 | 省/市 | 经营范围 |
+| --- | --- | --- | --- | --- |
+{candidates_md}
+
+## 四、LLM-A Prompt
+
+```text
+{pack['prompts']['llm_a']}
+```
+
+## 五、产物回填路径
+- `output/{state.code}/llm_a.manual.json` —— 严格按上述 Schema 输出
+- `output/{state.code}/report.manual.md` —— 严格按 llm_b Prompt 的分节输出
+"""
+    path = out_dir / "llm_pack.md"
+    path.write_text(md, encoding="utf-8")
+    return path

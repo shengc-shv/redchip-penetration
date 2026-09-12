@@ -148,6 +148,19 @@ def expand_upward(
     visited: set[str] = set()
     edges_added = 0
 
+    # 起点主体可能尚未建节点（LLM-A 未列出该实体），先按工商登记信息补建，
+    # 否则股东边会指向不存在的节点 id，形成悬挂边并拉低完整性评分。
+    if credit_code not in graph.nodes:
+        basic = client.get_company_basic(credit_code)
+        graph.add_company(
+            name=basic.name or credit_code,
+            jurisdiction=Jurisdiction.CN,
+            kind=EntityKind.OPCO,
+            credit_code=credit_code,
+            province=basic.province or None,
+            city=basic.city or None,
+        )
+
     while frontier:
         current, depth = frontier.pop(0)
         if current in visited or depth > depth_limit:
@@ -159,6 +172,8 @@ def expand_upward(
                 continue
             if sh.kind == "person":
                 person = graph.add_person(sh.name)
+                # 工商数据优先：清掉 VIE 登记股东的 0% 占位边
+                graph.remove_placeholder_own(person.id, current)
                 graph.add_own(
                     OwnEdge(
                         from_id=person.id,

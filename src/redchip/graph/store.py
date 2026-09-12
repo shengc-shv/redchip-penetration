@@ -132,6 +132,27 @@ class Graph:
         ):
             self.owns.append(edge)
 
+    def remove_placeholder_own(self, from_id: str, to_id: str) -> int:
+        """删除 0% 占位股权边（VIE 登记股东在未取得工商数据前的占位）。
+
+        工商数据到位后，占位边会被真实持股比例的边替换，避免出现同一对节点的
+        「0% 与 54.29%」双线噪声。
+
+        Args:
+            from_id: 股东 id。
+            to_id: 被持股公司 id。
+
+        Returns:
+            int: 删除的边的数量。
+        """
+        before = len(self.owns)
+        self.owns = [
+            e
+            for e in self.owns
+            if not (e.from_id == from_id and e.to_id == to_id and e.share_pct == 0.0)
+        ]
+        return before - len(self.owns)
+
     def add_control(self, edge: ControlEdge) -> None:
         """追加一条协议控制边（去重）。"""
         if not any(

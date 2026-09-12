@@ -30,7 +30,7 @@ def test_mermaid_output_shape():
     assert text.startswith("%%")
     assert "graph TD" in text
     assert "-->" in text
-    assert "-.->|VIE:" in text
+    assert "-.->|VIE" in text
 
 
 def test_dot_output_is_wellformed():

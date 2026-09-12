@@ -18,6 +18,7 @@ import typer
 from redchip import config as config_mod
 from redchip.graph import render as render_mod
 from redchip.graph.store import Graph
+from redchip.models.schema import CompanyReport
 from redchip.pipeline import run as pipeline
 from redchip.pipeline.targets import load_targets
 
@@ -76,6 +77,36 @@ def run(
 
 
 @app.command()
+def pack(
+    code: list[str] | None = typer.Option(  # noqa: B008 - typer 推荐写法
+        None, "--code", "-c", help="股票代码，可多次传入"
+    ),
+    mock: bool = typer.Option(
+        False, "--mock", help="离线模式：不发起任何外部请求"
+    ),
+) -> None:
+    """导出 LLM 分析包：把需要交给 LLM 的全部输入固化为 JSON + Markdown。
+
+    导出的 llm_pack.md 可直接用于本地分析；分析结果回填为
+    output/<code>/llm_a.manual.json 与 report.manual.md 后，再次执行 run 会优先采用。
+    """
+    settings = _bootstrap(mock)
+    targets = load_targets(codes=list(code) if code else None)
+    if not targets:
+        typer.secho("未指定目标：请用 --code 00700", fg=typer.colors.YELLOW)
+        raise typer.Exit(code=1)
+
+    for target in targets:
+        state = pipeline.load_state(target.code, settings)
+        state = pipeline.stage_fetch(state, settings)
+        state = pipeline.stage_candidates(
+            state, settings, name=target.name, keywords=target.wfoe_keywords
+        )
+        path = pipeline.stage_pack(state, settings, target.name)
+        typer.secho(f"{target.code} 分析包：{path}", fg=typer.colors.CYAN)
+
+
+@app.command()
 def render(code: str = typer.Argument(..., help="股票代码")) -> None:
     """根据已生成的 graph.json 重绘图。"""
     settings = _bootstrap(mock=False)
@@ -103,7 +134,19 @@ def render(code: str = typer.Argument(..., help="股票代码")) -> None:
     for e in data["controls"]:
         graph.controls.append(_rebuild_control(e))
 
-    produced = render_mod.render_all(graph, settings.redchip_output_dir / code)
+    # 若已生成过结果，带上 UBO 标注一起重绘
+    result_file = settings.redchip_output_dir / code / "result.json"
+    ubos = None
+    if result_file.exists():
+        report = CompanyReport.model_validate(json.loads(result_file.read_text(encoding="utf-8")))
+        ubos = report.ubos
+
+    produced = render_mod.render_all(
+        graph,
+        settings.redchip_output_dir / code,
+        ubos=ubos,
+        title=f"{code} 红筹架构穿透图",
+    )
     for fmt, path in produced.items():
         typer.secho(f"{fmt}: {path}", fg=typer.colors.CYAN)
 
