@@ -1,0 +1,1 @@
+"""RedChip penetration: domestic module."""

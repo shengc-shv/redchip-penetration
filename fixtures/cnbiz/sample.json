@@ -1,0 +1,81 @@
+{
+  "_note": "离线联调样例数据（未配置 CNBizAPI_KEY 或 REDCHIP_MOCK=true 时使用）。企业基本信息为公开工商登记风格的示意数据，持股比例仅用于验证穿透算法，实际以 CNBizAPI 实时返回为准。",
+  "candidates": [
+    {
+      "name": "腾讯科技（深圳）有限公司",
+      "credit_code": "9144030071526726XG",
+      "business_scope": "计算机软硬件技术开发、技术服务；增值电信业务；货物及技术进出口",
+      "province": "广东省",
+      "city": "深圳市"
+    },
+    {
+      "name": "深圳市腾讯计算机系统有限公司",
+      "credit_code": "91440300708461136T",
+      "business_scope": "计算机软硬件技术开发；增值电信业务经营；互联网信息服务",
+      "province": "广东省",
+      "city": "深圳市"
+    },
+    {
+      "name": "腾讯云计算（北京）有限责任公司",
+      "credit_code": "91110108551385082Q",
+      "business_scope": "技术服务、技术开发、云计算设备销售",
+      "province": "北京市",
+      "city": "北京市"
+    }
+  ],
+  "companies": {
+    "9144030071526726XG": {
+      "name": "腾讯科技（深圳）有限公司",
+      "credit_code": "9144030071526726XG",
+      "province": "广东省",
+      "city": "深圳市",
+      "reg_status": "存续",
+      "established_at": "2000-02-24",
+      "business_scope": "计算机软硬件技术开发、技术服务；增值电信业务",
+      "legal_person": "马化腾",
+      "shareholders": [
+        {
+          "name": "Tencent Technology (Hong Kong) Limited",
+          "kind": "company",
+          "credit_code": "",
+          "share_pct": 100.0,
+          "share_raw": "100%"
+        }
+      ]
+    },
+    "91440300708461136T": {
+      "name": "深圳市腾讯计算机系统有限公司",
+      "credit_code": "91440300708461136T",
+      "province": "广东省",
+      "city": "深圳市",
+      "reg_status": "存续",
+      "established_at": "1998-11-11",
+      "business_scope": "计算机软硬件技术开发；增值电信业务经营",
+      "legal_person": "马化腾",
+      "shareholders": [
+        { "name": "马化腾", "kind": "person", "credit_code": "", "share_pct": 54.29, "share_raw": "54.29%" },
+        { "name": "张志东", "kind": "person", "credit_code": "", "share_pct": 22.86, "share_raw": "22.86%" },
+        { "name": "陈一丹", "kind": "person", "credit_code": "", "share_pct": 11.43, "share_raw": "11.43%" },
+        { "name": "许晨晔", "kind": "person", "credit_code": "", "share_pct": 11.42, "share_raw": "11.42%" }
+      ]
+    },
+    "91110108551385082Q": {
+      "name": "腾讯云计算（北京）有限责任公司",
+      "credit_code": "91110108551385082Q",
+      "province": "北京市",
+      "city": "北京市",
+      "reg_status": "存续",
+      "established_at": "2010-03-18",
+      "business_scope": "技术服务、技术开发、云计算设备销售",
+      "shareholders": [
+        {
+          "name": "深圳市腾讯计算机系统有限公司",
+          "kind": "company",
+          "credit_code": "91440300708461136T",
+          "share_pct": 100.0,
+          "share_raw": "100%"
+        }
+      ]
+    }
+  }
+}

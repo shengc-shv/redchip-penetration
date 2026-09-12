@@ -1,0 +1,60 @@
+# 目标企业清单（方案文档 5.4 的可验证广东红筹样本）
+#
+# - code：港股代码；market：hk / us（us 为阶段二）
+# - wfoe_keywords：用于 CNBizAPI 检索境内 WFOE 的关键词，留空时自动从招股书文本中抽取公司名
+#
+# 注意：代码须为 HKEXnews 可检索的有效代码；发现失效请直接修正本文件。
+targets:
+  - code: "00700"
+    name: 腾讯控股
+    market: hk
+    city: 深圳
+    wfoe_keywords: ["腾讯", "Tencent"]
+
+  - code: "09868"
+    name: 小鹏汽车
+    market: hk
+    city: 广州
+    wfoe_keywords: ["小鹏", "汇天"]
+
+  - code: "06993"
+    name: 蓝月亮
+    market: hk
+    city: 广州
+    wfoe_keywords: ["蓝月亮"]
+
+  - code: "06969"
+    name: 思摩尔国际
+    market: hk
+    city: 深圳
+    wfoe_keywords: ["思摩尔"]
+
+  - code: "09926"
+    name: 康方生物
+    market: hk
+    city: 中山
+    wfoe_keywords: ["康方"]
+
+  - code: "06098"
+    name: 碧桂园服务
+    market: hk
+    city: 佛山
+    wfoe_keywords: ["碧桂园"]
+
+  - code: "02128"
+    name: 中国联塑
+    market: hk
+    city: 佛山
+    wfoe_keywords: ["联塑"]
+
+  - code: "09896"
+    name: 名创优品
+    market: hk
+    city: 广州
+    wfoe_keywords: ["名创优品"]
+
+  - code: "00570"
+    name: 中国中药
+    market: hk
+    city: 佛山
+    wfoe_keywords: ["中国中药", "天江药业"]

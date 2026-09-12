@@ -1,0 +1,115 @@
+name: RedChip Penetration Pipeline - Guangdong
+
+on:
+  schedule:
+    # 每周一 10:00（北京时间）= UTC 02:00
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+    inputs:
+      stock_codes:
+        description: 'Comma-separated HK stock codes'
+        required: false
+        default: '00700'
+      dry_run:
+        description: 'Use offline fixtures (no external requests)'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  penetration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    services:
+      neo4j:
+        image: neo4j:5
+        env:
+          NEO4J_AUTH: neo4j/${{ secrets.NEO4J_PASSWORD || 'redchip_dev' }}
+        ports:
+          - 7687:7687
+        options: >-
+          --health-cmd "wget -q --spider http://localhost:7474 || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # 目标企业：手动触发优先用输入值，定时任务跑 config/targets.yaml 全量
+      STOCK_CODES: ${{ github.event.inputs.stock_codes || '' }}
+      REDCHIP_MOCK: ${{ github.event.inputs.dry_run || 'false' }}
+      # 图库（未配置 NEO4J_URI 时自动退化为纯 JSON 落盘）
+      NEO4J_URI: bolt://localhost:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD || 'redchip_dev' }}
+      # 数据源密钥：未配置时自动降级，不会中断流水线
+      CNBIZAPI_KEY: ${{ secrets.CNBIZAPI_KEY }}
+      CNBIZAPI_BASE_URL: ${{ secrets.CNBIZAPI_BASE_URL || 'https://api.cnbizapi.com' }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      LLM_BASE_URL: ${{ secrets.LLM_BASE_URL || 'https://api.deepseek.com' }}
+      LLM_MODEL: ${{ secrets.LLM_MODEL || 'deepseek-chat' }}
+      # 阶段二（美股 20-F）预留
+      SEC_IDENTITY: ${{ secrets.SEC_IDENTITY || 'redchip-penetration you@example.com' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install system dependencies
+        # graphviz 用于把穿透路径图渲染为 PNG
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[neo4j]"
+
+      # ===== 阶段一：境外抓取（港股）=====
+      - name: Overseas - HKEXnews (HK)
+        run: python scripts/overseas_hkex.py
+
+      # ===== 阶段二、三：候选检索 + LLM-A =====
+      - name: LLM-A Structure + VIE + Disambiguation
+        continue-on-error: true
+        run: python scripts/llm_a.py
+
+      # ===== 阶段四：过滤 → 穿透 → 建图 → UBO =====
+      - name: Filter Guangdong WFOE
+        run: python scripts/filter_guangdong.py
+
+      - name: Domestic - CNBizAPI Recursive Penetration
+        run: python scripts/domestic_penetration.py
+
+      - name: Build Graph in Neo4j
+        continue-on-error: true
+        run: python scripts/build_graph.py
+
+      - name: Run UBO Penetration
+        run: python scripts/penetrate_ubo.py
+
+      # ===== 阶段五：LLM-B 报告 =====
+      - name: LLM-B Review + Report
+        continue-on-error: true
+        run: python scripts/llm_b.py
+
+      # ===== 阶段六：导出 =====
+      - name: Export results (PNG / SVG / Mermaid / JSON)
+        continue-on-error: true
+        run: python scripts/export_results.py
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: penetration-results
+          path: |
+            output/
+          if-no-files-found: warn
+          retention-days: 30

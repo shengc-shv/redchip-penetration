@@ -1,0 +1,44 @@
+[project]
+name = "redchip-penetration"
+version = "0.1.0"
+description = "红筹架构（VIE/开曼）自动股权穿透系统 —— 港美股上市主体 → 离岸层 → 境内 WFOE/运营实体 → UBO"
+requires-python = ">=3.11"
+readme = "README.md"
+
+dependencies = [
+    "httpx>=0.27",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "openai>=1.30",
+    "typer>=0.12",
+    "rich>=13.7",
+    "pyyaml>=6.0",
+    "pypdf>=4.2",
+]
+
+[project.optional-dependencies]
+# 图数据库持久化（可选，缺省时退化为内存图 + JSON 落盘）
+neo4j = ["neo4j>=5.20"]
+# 阶段二：美股 20-F（EdgarTools）
+us = ["edgartools>=3.0"]
+dev = ["pytest>=8.2", "ruff>=0.5"]
+
+[project.scripts]
+redchip = "redchip.cli:app"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
