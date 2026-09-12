@@ -10,6 +10,7 @@ from redchip.verify.crosscheck import crosscheck
 from redchip.verify.shareholders import (
     DisclosedHolder,
     extract_disclosed_holders,
+    extract_holders,
     is_complete_sum,
     sum_check,
 )
@@ -132,6 +133,54 @@ def test_pipeline_crosscheck_end_to_end(monkeypatch, tmp_path):
     assert report.crosscheck, "应写入交叉验证结果"
     assert len(report.crosscheck.get("disclosed", [])) == 4
     assert report.crosscheck.get("passed") is True
+
+
+HK_EN_TABLE = """Tencent Holdings Limited 78 Directors' Report
+INTERESTS OF SUBSTANTIAL SHAREHOLDERS
+As at 31 December 2025, the following persons had interests under Divisions 2 and 3 of Part XV of the SFO.
+Name of shareholder Long/ short position Nature of interest/ capacity Number of Shares held Approximate % of shareholding
+MIH Internet Holdings B.V. Long position Corporate (Note 1) 2,079,512,000 22.80%
+Advance Data Services
+ Limited
+Long position Corporate (Note 2) 804,859,700 8.82%
+Note: 1. MIH Internet Holdings B.V. is controlled by Naspers Limited.
+"""
+
+US_20F_TABLE = """The following table sets forth information with respect to beneficial ownership of our ordinary shares
+SoftBank Group Corp. beneficially owns approximately 1,234,567,890 shares representing 5.2%
+Mr. Jack Ma beneficially owns 890,123,456 Shares, representing 3.1% of our total shares
+"""
+
+
+def test_extract_en_table_rows_with_capacity_column():
+    """英文股东表：应剔除 Long position / Corporate (Note 1) 等 capacity 列。"""
+    holders = extract_holders(HK_EN_TABLE, source_page="79")
+    names = [h.name for h in holders]
+    assert "MIH Internet Holdings B.V" in names, names
+    assert "Advance Data Services Limited" in names, names
+    assert all("Long position" not in n and "Note" not in n for n in names)
+
+
+def test_extract_en_handles_soft_line_breaks():
+    """PDF 软换行把名称拆到多行时，仍应拼回完整名称。"""
+    holders = extract_holders(HK_EN_TABLE, source_page="79")
+    pcts = {h.name: h.share_pct for h in holders}
+    assert pcts.get("MIH Internet Holdings B.V") == 22.8
+    assert pcts.get("Advance Data Services Limited") == 8.82
+
+
+def test_extract_en_narrative_style():
+    """美股 20-F 的叙述式持股表述也应被抽取。"""
+    holders = extract_holders(US_20F_TABLE, source_page="367")
+    names = [h.name for h in holders]
+    assert any("SoftBank" in n for n in names), names
+    assert any("Jack Ma" in n for n in names), names
+
+
+def test_en_noise_words_filtered():
+    """英文虚词不应被当作股东名。"""
+    holders = extract_holders("and 1% was 8.8% own 5%", source_page="1")
+    assert holders == []
 
 
 @pytest.mark.parametrize("text", ["无股东信息的普通段落，不含比例。"])

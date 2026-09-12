@@ -34,6 +34,12 @@ SHAREHOLDER_KEYWORDS: tuple[str, ...] = (
     "beneficially owned",
     "share ownership",
     "Principal Shareholders",
+    # 港股英文年报：第XV部权益披露章节的英文表述
+    "Substantial Shareholders",
+    "Interests of Substantial",
+    "Part XV",
+    "beneficial ownership",
+    "interests or short positions",
 )
 
 # 「名称 + 持股百分比」抽取：
@@ -45,10 +51,48 @@ _HOLDER_RE = re.compile(
 _SUMMARY_WORDS = ("合计", "總計", "总计", "total", "小计", "约", "其余")
 # 英文虚词与常见动词：英文披露中「and 1%」「was 8.8%」会被中文抽取器误判为股东名
 _EN_STOPWORDS = frozenset(
-    ["and", "or", "the", "of", "in", "to", "for", "as", "by", "with", "was", "were", "are", "is", "been", "being", "representing", "representing", "accordingly", "approximately", "respectively", "including", "excluded", "less", "more", "than", "about", "over", "under", "each", "such", "other", "which", "that", "this", "these", "those", "from", "at", "on", "our", "its", "their", "his", "her", "not", "no", "all", "any", "per", "due", "may", "will", "would", "could", "should"]
+    ["and", "or", "the", "of", "in", "to", "for", "as", "by", "with", "was", "were", "are", "is", "been", "being", "representing", "representing", "accordingly", "approximately", "respectively", "including", "excluded", "less", "more", "than", "about", "over", "under", "each", "such", "other", "which", "that", "this", "these", "those", "from", "at", "on", "our", "its", "their", "his", "her", "not", "no", "all", "any", "per", "due", "may", "will", "would", "could", "should", "own", "owns", "owned",
+    "holding", "holds", "held", "represents",
+]
 )
 # 称谓后缀：name 组是贪婪汉字匹配，会把「先生/女士」一并吞掉，提取后统一剥离
 _HONORIFIC_SUFFIX_RE = re.compile(r"(先生|女士|小姐|Mr\.?|Ms\.?|Mrs\.?)$")
+
+# ---------- 英文股东表（港股英文年报 / 美股 20-F 共用）----------
+# 表格行式：「名称 + 股份数（含千分位）+ 持股百分比」
+# 例：Naspers Limited  2,548,xxx,xxx  24.09%
+_EN_TABLE_ROW_RE = re.compile(
+    r"([A-Z][A-Za-z0-9&.,'\- ]{2,80})\s+[^%\n]{0,80}?[\d,]{3,}"
+    r"\s+(\d{1,3}(?:\.\d{1,2})?)\s*%"
+)
+# 叙述式：「名称 + beneficially owns / beneficial owner … 百分比」
+# 例：Ma Huateng beneficially owns approximately 8.63% of our issued shares
+_EN_NARRATIVE_RE = re.compile(
+    r"([A-Z][A-Za-z0-9&.,'\- ]{2,60}?)\s+(?:beneficially\s+owns?|beneficial\s+owner)"
+    r"[^.]{0,160}?(\d{1,3}(?:\.\d{1,2})?)\s*%"
+)
+# 股东表的 Capacity 列会紧随名称出现（Beneficial owner / Interest of controlled corporation …），
+# 需要截断，否则「Naspers Limited Interest of controlled corporation」会被当成股东名
+_EN_CAPACITY_RE = re.compile(
+    r"\s+(?:interest\s+of|beneficial\s+owner|investment\s+manager|held\s+by|founder\s+of|"
+    r"beneficiary\s+of|trustee|corporation|company|other|long\s+position|short\s+position|"
+    r"corporate|beneficial|interest|nature\s+of|note)\b.*$",
+    re.IGNORECASE,
+)
+# 表格标题与页眉噪声词
+_EN_NOISE = (
+    "table of contents",
+    "notes",
+    "note",
+    "total",
+    "subtotal",
+    "see",
+    "item",
+    "part",
+    "page",
+    "the company",
+    "our company",
+)
 
 
 class DisclosedHolder(BaseModel):
@@ -132,6 +176,123 @@ def extract_from_hits(hits: Iterable[FtsHit]) -> list[DisclosedHolder]:
     for hit in hits:
         out.extend(extract_disclosed_holders(hit.snippet, source_page=str(hit.page_no)))
     return out
+
+
+def extract_holders(text: str, source_page: str = "") -> list[DisclosedHolder]:
+    """中英双通道抽取披露文件中的股东持股记录。
+
+    - 中文通道：年报「主要股东权益」等章节（简体/繁体年报）
+    - 英文通道：港股**英文年报**与美股 20-F 的股东表格（Name / shares / %）
+
+    之所以必须支持英文：港股披露易同时提供繁体中文版与英文版，
+    而中文版 PDF 用 pypdf 提取会出现 CID 编码乱码，英文版提取完整，
+    因此英文披露是港股与美股共同的可靠输入。
+
+    Args:
+        text: 披露文本。
+        source_page: 源页码标记。
+
+    Returns:
+        list[DisclosedHolder]: 去重后的持股记录。
+    """
+    holders = extract_disclosed_holders(text, source_page=source_page)
+    holders.extend(extract_en_holders(text, source_page=source_page))
+    return _dedupe_holders(holders)
+
+
+def _soft_unwrap(text: str, min_line: int = 80) -> str:
+    """合并 PDF 提取产生的软换行。
+
+    英文表格常被拆成多个短行（名称一行、capacity 一行、数字一行），
+    不合并则「名称 + 股份数 + 百分比」无法在同一行内匹配。
+
+    Args:
+        text: 原始文本。
+        min_line: 小于此长度的行视为续行。
+
+    Returns:
+        str: 合并后的文本。
+    """
+    out: list[str] = []
+    buf = ""
+    for raw in (text or "").split("\n"):
+        line = raw.strip()
+        if not line:
+            if buf:
+                out.append(buf)
+            buf = ""
+            continue
+        if buf and len(line) < min_line:
+            buf = f"{buf} {line}"
+        else:
+            if buf:
+                out.append(buf)
+            buf = line
+    if buf:
+        out.append(buf)
+    return "\n".join(out)
+
+
+def extract_en_holders(text: str, source_page: str = "") -> list[DisclosedHolder]:
+    """从英文披露中抽取「名称 + 持股百分比」。
+
+    覆盖两种写法：
+    1. 表格行：``Naspers Limited  2,548,xxx,xxx  24.09%``
+    2. 叙述句：``Ma Huateng beneficially owns approximately 8.63% ...``
+
+    Args:
+        text: 英文披露文本。
+        source_page: 源页码标记。
+
+    Returns:
+        list[DisclosedHolder]: 抽取结果。
+    """
+    out: list[DisclosedHolder] = []
+    prepared = _soft_unwrap(text)
+    for regex in (_EN_TABLE_ROW_RE, _EN_NARRATIVE_RE):
+        for match in regex.finditer(prepared):
+            raw_name = match.group(1).strip(" ,.;:-")
+            raw_name = _EN_CAPACITY_RE.sub("", raw_name).strip(" ,.;:-")
+            pct_text = match.group(2)
+            lowered = raw_name.lower()
+            if lowered in _EN_STOPWORDS:
+                continue
+            if any(noise in lowered for noise in _EN_NOISE):
+                continue
+            if len(raw_name) < 3 or not any(ch.isalpha() for ch in raw_name):
+                continue
+            try:
+                pct = float(pct_text)
+            except ValueError:
+                continue
+            if not (0 < pct <= 100):
+                continue
+            out.append(
+                DisclosedHolder(
+                    name=raw_name, share_pct=pct, share_raw=f"{pct:g}%", source_page=source_page
+                )
+            )
+    return _dedupe_holders(out)
+
+
+def _dedupe_holders(holders: list[DisclosedHolder]) -> list[DisclosedHolder]:
+    """按「名称 + 比例」去重并保持顺序。
+
+    Args:
+        holders: 原始记录。
+
+    Returns:
+        list[DisclosedHolder]: 去重后的记录。
+    """
+    seen: set[tuple[str, float]] = set()
+    uniq: list[DisclosedHolder] = []
+    for h in holders:
+        key = (h.name, h.share_pct)
+        if key in seen:
+            continue
+        seen.add(key)
+        uniq.append(h)
+    return uniq
 
 
 def sum_check(holders: Iterable[DisclosedHolder], tolerance: float = 0.5) -> float:

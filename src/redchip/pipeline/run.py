@@ -1285,7 +1285,9 @@ def _recall_shareholder_text(state: PipelineState, cfg: config_mod.Settings) -> 
     import sqlite3
 
     conn = sqlite3.connect(index_path)
-    hits = fts_mod.search(conn, keywords=verify_mod.SHAREHOLDER_KEYWORDS, max_tokens=2000)
+    hits = fts_mod.search(
+        conn, keywords=verify_mod.SHAREHOLDER_KEYWORDS, max_tokens=8000, snippet_chars=3000
+    )
     return fts_mod.render_hits(hits)
 
 
@@ -1436,7 +1438,9 @@ def stage_crosscheck(state: PipelineState, cfg: config_mod.Settings) -> Pipeline
         import sqlite3
 
         conn = sqlite3.connect(index_path)
-        hits = fts_mod.search(conn, keywords=verify_mod.SHAREHOLDER_KEYWORDS, max_tokens=3000)
+        hits = fts_mod.search(
+            conn, keywords=verify_mod.SHAREHOLDER_KEYWORDS, max_tokens=8000, snippet_chars=3000
+        )
         fts_payload = [h.model_dump() for h in hits]
         state.fts_hits = state.fts_hits or fts_payload
     else:

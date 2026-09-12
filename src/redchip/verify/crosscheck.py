@@ -24,7 +24,7 @@ from redchip.overseas import fts as fts_mod
 from redchip.verify.shareholders import (
     SHAREHOLDER_KEYWORDS,
     DisclosedHolder,
-    extract_from_hits,
+    extract_holders,
     is_complete_sum,
     sum_check,
 )
@@ -213,8 +213,12 @@ def _extract_from_hits_by_keywords(hits: list[fts_mod.FtsHit]) -> list[Disclosed
     shareholder_hits = [
         h for h in hits if any(kw.lower() in h.snippet.lower() for kw in SHAREHOLDER_KEYWORDS)
     ]
-    # 优先从股东关键词命中的段落提取；使用 extract_from_hits 以保留页码溯源（source_page）
+    # 优先从股东关键词命中的段落提取，并保留页码溯源（source_page）
     shareholder_hits = [
         h for h in hits if any(kw.lower() in h.snippet.lower() for kw in SHAREHOLDER_KEYWORDS)
     ]
-    return extract_from_hits(shareholder_hits or hits)
+    source = shareholder_hits or hits
+    out: list[DisclosedHolder] = []
+    for hit in source:
+        out.extend(extract_holders(hit.snippet, source_page=str(hit.page_no)))
+    return out
