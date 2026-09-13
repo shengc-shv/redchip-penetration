@@ -59,9 +59,13 @@ def test_ubo_is_penetrated(monkeypatch, tmp_path):
 
 
 def test_missing_llm_key_is_downgraded_not_crashed(monkeypatch, tmp_path):
-    """未配置 LLM API Key 时应降级为规则兜底并标记需人工复核。"""
+    """既无 LLM Key 又无本地分析结果时，应降级为规则兜底并标记需人工复核。"""
     monkeypatch.delenv("LLM_API_KEY", raising=False)
     cfg = _mock_env(monkeypatch, tmp_path)
+    # 屏蔽 fixtures/manual 下的本地分析结果，验证真正的降级路径
+    monkeypatch.setattr(
+        pipeline, "manual_llm_a_path", lambda code, cfg: tmp_path / "absent.json"
+    )
     report = pipeline.run_hk("00700", "腾讯控股", ["腾讯"], cfg)
     assert report.needs_review is True
     assert any("LLM" in reason for reason in report.review_reasons)

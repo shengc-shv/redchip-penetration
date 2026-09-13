@@ -25,7 +25,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from redchip import config as config_mod
-from redchip.brief.stakeholders import build_paths, build_stakeholders
+from redchip.brief.stakeholders import build_stakeholders
 from redchip.models.schema import CompanyReport
 
 # 视觉风格：深红主色 + 大量留白 + 细线分隔 + 金色点缀
@@ -72,6 +72,12 @@ td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; l
 td.k { color: #999; width: 128px; }
 .muted { color: #666; font-size: 12px; line-height: 1.7; }
 .foot { text-align: center; color: #b0b0b0; font-size: 11.5px; margin-top: 20px; line-height: 1.8; }
+.lv { display:inline-block; padding:2px 8px; border-radius:2px; font-size:11.5px;
+  font-weight:600; margin-left:6px; }
+.lv-L1 { background:#eef7f0; color:#2f6b38; }
+.lv-L2 { background:#eef2fa; color:#2b4b8f; }
+.lv-L3 { background:#fdf6e9; color:#8a6c2f; }
+.lv-L4 { background:#f2f2f3; color:#666; }
 .pill { display:inline-block; padding:1px 6px; border-radius:2px; font-size:11px;
   background:#f7f7f8; color:#666; margin-right:5px; }
 @media (max-width: 640px) {
@@ -228,15 +234,17 @@ def render_brief(data: dict) -> str:
             f'<div class="row"><b>切入：</b>{e(how)}</div>'
             f'<div class="row"><b>依据：</b>{e(why)}</div></div>'
         )
-    directions = "".join(
-        f"<tr><td><b>{e(line)}</b></td><td>{e(direction)}</td><td>{e(detail)}</td></tr>"
-        for line, direction, detail in data["directions"]
-    )
-    notes = "".join(f"<li>{n}</li>" for n in data["notes"])
     juris = (
         '<span class="tag n">辖内</span>'
         if data["jurisdiction"] == "辖内"
         else '<span class="tag w">非辖内</span>'
+    )
+    ev = data.get("evidence") or {}
+    ev_badge = (
+        f'<span class="lv lv-{ev.get("level", "L4")}">证据等级 {ev.get("level", "—")} '
+        f'{ev.get("label", "")}</span>'
+        if ev
+        else ""
     )
 
     return f"""<!DOCTYPE html>
@@ -246,7 +254,7 @@ def render_brief(data: dict) -> str:
 <body><div class="wrap" style="--w:760px">
   <div class="head">
     <h1>{e(data["name"])} <span style="font-weight:400;color:#bbb;font-size:14px">{e(data["code"])}</span></h1>
-    <div class="meta">{e(data["market"])} · {e(data["doc"])} · 注册地 {e(data["seat"])} {juris}</div>
+    <div class="meta">{e(data["market"])} · {e(data["doc"])} · 注册地 {e(data["seat"])} {juris}{ev_badge}</div>
     <div class="concl">{data["conclusion"]}</div>
   </div>
 
@@ -255,13 +263,10 @@ def render_brief(data: dict) -> str:
   <h2><span class="bar"></span>商机分档</h2>
   {opps}
 
-  <h2><span class="bar"></span>推进方向</h2>
-  <div class="card" style="padding:6px 4px">
-    <table><thead><tr><th style="width:92px">条线</th><th style="width:120px">切入方向</th><th>说明</th></tr></thead>
-    <tbody>{directions}</tbody></table>
-  </div>
-
-  <div class="card"><div class="muted"><b>说明与边界</b><ul style="margin:8px 0 0;padding-left:18px">{notes}</ul></div></div>
+  <div class="card"><div class="muted">
+    <b>口径说明</b>：企业信息取自公开披露文件（{e(data["doc"])}）与境内工商登记；
+    具体数字（人员规模、资金体量等）需业务部门另行核实。
+  </div></div>
 
   <div class="foot">
     穿透链条：{e(data["chain"])}<br>
@@ -271,20 +276,18 @@ def render_brief(data: dict) -> str:
 </div></body></html>"""
 
 
-def render_deck(data: dict, rows: list | None = None, paths: list | None = None) -> str:
-    """风格 B：会前简报（首战指挥版）。
+def render_deck(data: dict, rows: list | None = None) -> str:
+    """风格 B：会前简报（只呈现抽取到的事实信息，不含行动建议）。
 
     Args:
         data: 企业商机数据。
         rows: 干系人作战表。
-        paths: 接触路径。
 
     Returns:
         str: HTML 文档。
     """
     e = html.escape
     rows = rows or []
-    paths = paths or []
 
     matrix = "".join(
         f"<tr><td><b>{e(t)}</b></td><td>{e(who)}</td><td>{_tag(level)}</td><td>{e(why)}</td></tr>"
@@ -296,19 +299,41 @@ def render_deck(data: dict, rows: list | None = None, paths: list | None = None)
         f"<td>{e(r.reach_label)}</td><td class='muted'>{e(r.note)}</td></tr>"
         for r in rows
     )
-    path_cards = "".join(
-        f'<div style="padding:10px 0;border-bottom:1px dashed #ececef">'
-        f'<div style="font-weight:600;font-size:13.5px;color:#1a1a1a">{e(name)}</div>'
-        f'<div class="muted" style="margin-top:4px">{e(desc)}</div></div>'
-        for name, desc in paths
-    )
-    directions = "".join(
-        f"<tr><td><b>{e(line)}</b></td><td>{e(direction)}</td><td>{e(detail)}</td></tr>"
-        for line, direction, detail in data["directions"]
-    )
-    notes = "".join(f"<li>{n}</li>" for n in data["notes"])
     domestic = "".join(f"<li>{e(d)}</li>" for d in data["domestic"])
     juris = "辖内" if data["jurisdiction"] == "辖内" else "非辖内（跨区）"
+
+    ev = data.get("evidence") or {}
+    ev_badge = (
+        f'<span class="lv lv-{ev.get("level", "L4")}">证据等级 {ev.get("level", "—")} '
+        f'{ev.get("label", "")}</span>'
+        if ev
+        else ""
+    )
+    ev_basis = "".join(f"<li>{e(b)}</li>" for b in ev.get("basis", []))
+    onshore = data.get("onshore") or []
+    onshore_rows = "".join(
+        f"<tr><td><b>{e(s['entity'])}</b></td><td>{e('、'.join(s['offshore_holders']))}</td>"
+        f"<td>{e(s['verdict'])}</td><td class='muted'>{e(s['basis'])}</td></tr>"
+        for s in onshore
+    )
+    onshore_section = (
+        f"""  <div class="card">
+    <h2 style="margin-top:0"><span class="bar"></span>⑤ 境内反推信号（广东省内主体 · 工商登记口径）</h2>
+    <table>
+      <thead><tr><th style="width:22%">广东省内主体</th><th style="width:26%">境外股东</th>
+      <th style="width:14%">判断</th><th>依据</th></tr></thead>
+      <tbody>{onshore_rows}</tbody>
+    </table>
+    <div class="muted" style="margin-top:10px">
+      仅对广东省内主体执行：境内工商登记的股东若为境外主体，即构成外资持有的直接证据。
+      结论一律为「疑似」——股东为境外公司是必要条件而非充分条件，是否属红筹架构需人工核实。
+    </div>
+  </div>
+
+"""
+        if onshore
+        else ""
+    )
 
     return f"""<!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="utf-8">
@@ -319,7 +344,7 @@ def render_deck(data: dict, rows: list | None = None, paths: list | None = None)
   <div class="head">
     <div style="font-size:12px;color:#a30030;letter-spacing:3px">红筹企业商机 · 会前简报</div>
     <h1 style="margin-top:6px;color:#1a1a1a">{e(data["name"])} <span style="font-weight:400;color:#bbb;font-size:14px">{e(data["code"])}</span></h1>
-    <div class="meta">{e(data["market"])} · 披露文件：{e(data["doc"])} · 注册地 {e(data["seat"])} · <b>{e(juris)}</b></div>
+    <div class="meta">{e(data["market"])} · 披露文件：{e(data["doc"])} · 注册地 {e(data["seat"])} · <b>{e(juris)}</b>{ev_badge}</div>
     <div class="concl">{data["conclusion"]}</div>
   </div>
 
@@ -332,6 +357,9 @@ def render_deck(data: dict, rows: list | None = None, paths: list | None = None)
       <tr><td class="k">境内主体</td><td colspan="3"><ul style="margin:0;padding-left:16px">{domestic}</ul></td></tr>
       <tr><td class="k">最终受益人</td><td>{e(data["ubo"])}</td>
           <td class="k">披露口径股东</td><td>{e(data["disclosed"])}</td></tr>
+      <tr><td class="k">证据等级</td><td colspan="3">
+          <b>{e(ev.get("level", "—"))} {e(ev.get("label", ""))}</b>——{e(ev.get("note", ""))}
+          <ul class="muted" style="margin:6px 0 0;padding-left:18px">{ev_basis}</ul></td></tr>
     </table>
   </div>
 
@@ -377,27 +405,9 @@ def render_deck(data: dict, rows: list | None = None, paths: list | None = None)
     </div>
   </div>
 
-  <div class="card">
-    <h2 style="margin-top:0"><span class="bar"></span>⑤ 接触路径（从谁撬动谁）</h2>
-    {path_cards}
-  </div>
-
-  <div class="card">
-    <h2 style="margin-top:0"><span class="bar"></span>⑥ 推进方向</h2>
-    <table>
-      <thead><tr><th style="width:100px">条线</th><th style="width:140px">切入方向</th><th>说明</th></tr></thead>
-      <tbody>{directions}</tbody>
-    </table>
-  </div>
-
-  <div class="card">
-    <h2 style="margin-top:0"><span class="bar"></span>⑦ 合规与边界</h2>
-    <div class="muted"><ul style="margin:0;padding-left:18px">{notes}</ul></div>
-  </div>
-
-  <div class="foot">
-    本简报由红筹架构自动穿透系统生成：公开披露文件 → 架构与股东提取 → 工商登记交叉核验 → 商机判断<br>
-    所有企业信息均来自公开渠道；业务判断为分析建议，须经业务部门核实后使用
+{onshore_section}  <div class="foot">
+    数据来源：公开披露文件（{e(data["doc"])}）+ 境内工商登记 · 由红筹架构穿透系统自动抽取<br>
+    企业信息均取自公开渠道；具体数字（人员规模、资金体量等）需业务部门另行核实
   </div>
 </div></body></html>"""
 
@@ -411,7 +421,6 @@ def main() -> None:
     for code, data in BRIEFS.items():
         result_file = cfg.redchip_output_dir / code / "result.json"
         rows: list = []
-        paths: list = []
         if result_file.exists():
             report = CompanyReport.model_validate(
                 json.loads(result_file.read_text(encoding="utf-8"))
@@ -419,11 +428,15 @@ def main() -> None:
             # 披露时点以穿透结果为准，避免手工维护漂移
             data["doc"] = f"{report.doc_kind}（{report.doc_published_at}）"
             rows = build_stakeholders(report, target_province=data["target_province"])
-            paths = build_paths(rows)
-            print(f"  → 干系人 {len(rows)} 条")
+            data["evidence"] = report.evidence or {}
+            data["onshore"] = report.onshore_signals or []
+            print(
+                f"  → 干系人 {len(rows)} 条｜证据等级 "
+                f"{data['evidence'].get('level', '—')}｜境内反推 {len(data['onshore'])} 条"
+            )
 
         brief_html = render_brief(data)
-        deck_html = render_deck(data, rows, paths)
+        deck_html = render_deck(data, rows)
 
         (out_dir / f"{code}_{data['name']}_一页纸速览.html").write_text(
             brief_html, encoding="utf-8"

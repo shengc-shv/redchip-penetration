@@ -1244,27 +1244,40 @@ def stage_ubo(state: PipelineState, cfg: config_mod.Settings, name: str = "") ->
 def manual_llm_a_path(code: str, cfg: config_mod.Settings) -> Path:
     """返回「本地分析产出的 LLM-A 结果」路径。
 
+    人工分析结果属于**输入**而非产物，因此默认存放在 ``fixtures/manual/``，
+    避免清理 ``output/`` 时被误删；同时兼容历史路径 ``output/<code>/llm_a.manual.json``。
+
     Args:
         code: 股票代码。
         cfg: 全局配置。
 
     Returns:
-        Path: ``output/<code>/llm_a.manual.json``。
+        Path: 首个存在的路径；均不存在时返回 fixtures 下的默认位置。
     """
-    return cfg.redchip_output_dir / code / "llm_a.manual.json"
+    preferred = config_mod.FIXTURES_DIR / "manual" / f"{code}_llm_a.json"
+    legacy = cfg.redchip_output_dir / code / "llm_a.manual.json"
+    if preferred.exists() or not legacy.exists():
+        return preferred
+    return legacy
 
 
 def manual_report_path(code: str, cfg: config_mod.Settings) -> Path:
     """返回「本地分析产出的报告」路径。
 
+    与 ``manual_llm_a_path`` 一致，优先取 ``fixtures/manual/``，兼容历史路径。
+
     Args:
         code: 股票代码。
         cfg: 全局配置。
 
     Returns:
-        Path: ``output/<code>/report.manual.md``。
+        Path: 首个存在的路径；均不存在时返回 fixtures 下的默认位置。
     """
-    return cfg.redchip_output_dir / code / "report.manual.md"
+    preferred = config_mod.FIXTURES_DIR / "manual" / f"{code}_report.md"
+    legacy = cfg.redchip_output_dir / code / "report.manual.md"
+    if preferred.exists() or not legacy.exists():
+        return preferred
+    return legacy
 
 
 def _recall_shareholder_text(state: PipelineState, cfg: config_mod.Settings) -> str:
@@ -1456,11 +1469,23 @@ def stage_crosscheck(state: PipelineState, cfg: config_mod.Settings) -> Pipeline
 
     cc = cc_mod.crosscheck(report, graph, fts_payload, cfg, extra_holders=extra_holders)
 
+    # 境内反推（仅目标省份）+ 证据等级：均不消耗外部额度，放在最后统一计算
+    from redchip.domestic import onshore as onshore_mod
+    from redchip.models import evidence as evidence_mod
+
+    report.onshore_signals = [
+        sig.model_dump()
+        for sig in onshore_mod.detect_onshore_signals(graph, state.target_province)
+    ]
+    assessment = evidence_mod.evaluate_evidence(report)
+    report.evidence = assessment.model_dump()
+
     result_path(state.code, cfg).write_text(
         json.dumps(report.model_dump(mode="json"), ensure_ascii=False, indent=2), encoding="utf-8"
     )
     print(
-        f"{state.code} 交叉验证：披露口径 {len(cc.disclosed)} 条，"
-        f"问题 {len(cc.issues)} 项（{'通过' if cc.passed else '需复核'}）"
+        f"{state.code} 交叉验证：披露口径 {len(cc.disclosed)} 条，问题 {len(cc.issues)} 项"
+        f"（{'通过' if cc.passed else '需复核'}）｜证据等级 {assessment.level.value} "
+        f"{assessment.label}｜境内反推信号 {len(report.onshore_signals)} 条"
     )
     return save_state(state, cfg)

@@ -1,0 +1,70 @@
+{
+  "listed_entity": {
+    "name": "腾讯控股有限公司",
+    "jurisdiction": "Cayman",
+    "type": "上市主体"
+  },
+  "intermediate_entities": [
+    {
+      "name": "Tencent Holdings BVI Limited",
+      "jurisdiction": "BVI",
+      "type": "离岸中间控股公司",
+      "parent": "腾讯控股有限公司"
+    },
+    {
+      "name": "Tencent Technology (Hong Kong) Limited",
+      "jurisdiction": "HK",
+      "type": "香港中间控股公司",
+      "parent": "Tencent Holdings BVI Limited"
+    }
+  ],
+  "wfoe": [
+    {
+      "name": "腾讯科技（深圳）有限公司",
+      "credit_code": "9144030071526726XG",
+      "matched_candidate_index": 0,
+      "match_reason": "年报 p.13 明确列示其为中国境内外商独资企业，位于广东省深圳市；与候选 0 的企业名称、统一社会信用代码及注册地完全一致"
+    }
+  ],
+  "vie_contracts": [
+    {
+      "type": "独家服务协议",
+      "party_a": "腾讯科技（深圳）有限公司",
+      "party_b": "深圳市腾讯计算机系统有限公司",
+      "shareholders": ["马化腾", "张志东"]
+    },
+    {
+      "type": "股权质押",
+      "party_a": "腾讯科技（深圳）有限公司",
+      "party_b": "深圳市腾讯计算机系统有限公司",
+      "shareholders": ["马化腾", "张志东"]
+    },
+    {
+      "type": "投票权委托",
+      "party_a": "腾讯科技（深圳）有限公司",
+      "party_b": "深圳市腾讯计算机系统有限公司",
+      "shareholders": ["马化腾", "张志东"]
+    },
+    {
+      "type": "独家购买权",
+      "party_a": "腾讯科技（深圳）有限公司",
+      "party_b": "深圳市腾讯计算机系统有限公司",
+      "shareholders": ["马化腾", "张志东"]
+    }
+  ],
+  "ubo_candidates": [
+    {
+      "name": "马化腾",
+      "path": "腾讯控股（开曼）→ …离岸平台… → 深圳市腾讯计算机系统有限公司（VIE 运营实体登记股东）",
+      "estimated_share": "未知：披露文件未给出离岸层穿透比例；工商登记口径为 54.29%，系 VIE 架构下的登记持股"
+    },
+    {
+      "name": "张志东",
+      "path": "同上",
+      "estimated_share": "未知：工商登记口径 22.86%，同为 VIE 架构下的登记持股"
+    }
+  ],
+  "chain_summary": "腾讯控股有限公司（开曼）→ Tencent Holdings BVI Limited（BVI）→ Tencent Technology (Hong Kong) Limited（香港）→ 腾讯科技（深圳）有限公司（WFOE，深圳）→（VIE 结构性合约：独家服务/股权质押/投票权委托/独家购买权）→ 深圳市腾讯计算机系统有限公司（境内运营实体，登记股东马化腾、张志东）",
+  "confidence": 0.82,
+  "source_pages": ["12", "13", "45", "46", "47", "79", "88"]
+}

@@ -322,6 +322,10 @@ class CompanyReport(BaseModel):
     guangdong_entities: list[str] = Field(default_factory=list)
     # 交叉验证结果（CrosscheckResult 的 dump），供报告与下游消费
     crosscheck: dict[str, Any] = Field(default_factory=dict)
+    # 境内工商反推信号（仅广东省内主体，用于无官方披露的企业）
+    onshore_signals: list[dict[str, Any]] = Field(default_factory=list)
+    # 证据等级评定（EvidenceAssessment 的 dump）
+    evidence: dict[str, Any] = Field(default_factory=dict)
     needs_review: bool = False
     review_reasons: list[str] = Field(default_factory=list)
 
