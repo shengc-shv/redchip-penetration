@@ -61,7 +61,9 @@ UBO 识别与解读。GitHub Actions 运行，无需服务器。
   但 ① **TLS 证书已过期**，httpx 默认校验直接连不上；② 真实接口是 **GET + query**
   （`/v1/company/search?keyword=`、`/basic?q=`、`/shareholders?q=`），
   与 `domestic/cnbiz.py` 里的 POST + JSON body 不符，接入前必须先改代码；
-  ③ `get_shareholders` 属**付费工具（1 积分/次）**，免费额度只覆盖 search/basic/verify。
+  ③ `get_shareholders` 属**付费工具（1 积分/次）**，免费额度只覆盖 search/basic/verify；
+  ④ **官网「Get Free API Key」按钮失效**（指向 POST-only 的 `/v1/auth/register`，
+  浏览器点击必 404，且官网无注册表单）→ 用 `scripts/get_cnbizapi_key.py` 注册。
 
 ## 常用命令
 ```bash

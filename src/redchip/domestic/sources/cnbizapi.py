@@ -116,12 +116,14 @@ class CnbizApiSource:
 
         Args:
             name: 企业名称关键词。
-            limit: 返回条数上限。
+            limit: 返回条数上限（客户端截断）。
 
         Returns:
             list[CandidateCompany]: 候选列表。
         """
-        payload = self._get("/v1/company/search", {"keyword": name, "limit": limit})
+        # 只传官方示例确认过的参数：服务端是 NestJS，若开启了未知属性严格校验，
+        # 多传 limit 会直接 400；条数上限在客户端截断即可，省一次排障
+        payload = self._get("/v1/company/search", {"keyword": name})
         rows = unwrap(payload)
         out: list[CandidateCompany] = []
         for row in rows[:limit]:
