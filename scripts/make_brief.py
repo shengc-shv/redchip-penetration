@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import html
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -41,7 +42,11 @@ body { margin: 0; padding: 24px 14px 56px; background: #f7f7f8;
 /* 抬头区：白底 + 顶部细红线，红色只做点睛，不做大面积色块 */
 .head { background: #fff; border: 1px solid #e8e8e8; border-top: 3px solid #a30030;
   border-radius: 3px; padding: 20px 22px; margin-bottom: 10px; }
-.head h1 { margin: 0 0 6px; font-size: 21px; font-weight: 600; color: #1a1a1a; letter-spacing: .5px; }
+.head h1 { margin: 0; font-size: 21px; font-weight: 600; color: #1a1a1a; letter-spacing: .5px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand img { width: 44px; height: 44px; border-radius: 9px; flex: 0 0 auto; }
+.brand .kicker { font-size: 11.5px; color: #a30030; letter-spacing: 2px; margin-bottom: 3px; }
+.brand .code { font-weight: 400; color: #bbb; font-size: 13.5px; }
 .head .meta { font-size: 12.5px; color: #999; }
 .head .concl { margin-top: 14px; padding: 12px 14px; background: #fafafa;
   border-left: 3px solid #a30030; border-radius: 2px; font-size: 14px; line-height: 1.75; color: #333; }
@@ -92,10 +97,120 @@ td.k { color: #999; width: 128px; }
 # 商机数据：结论来自穿透事实，业务判断标注依据（不含时限与排期）
 # ---------------------------------------------------------------------------
 
+# 站点根地址：og:image / og:url 必须是绝对地址，微信与各平台才会正确抓取卡片
+SITE_BASE = "https://shengc-shv.github.io/redchip-penetration/"
+CARD_TITLE_PREFIX = "企业分析"
+
+
+def card_title(data: dict, suffix: str = "") -> str:
+    """生成链接卡片标题（企业分析·“企业名”）。
+
+    Args:
+        data: 企业数据。
+        suffix: 可选的页面后缀（同一企业多页时区分）。
+
+    Returns:
+        str: 卡片标题。
+    """
+    return f"{CARD_TITLE_PREFIX}·“{data['name']}”{suffix}"
+
+
+def card_desc(data: dict) -> str:
+    """生成链接卡片摘要：一句话说清企业是什么、在哪上市、境内架构规模。
+
+    微信卡片正文约显示两行，因此控制在 70 字以内。
+
+    Args:
+        data: 企业数据。
+
+    Returns:
+        str: 卡片摘要（纯文本）。
+    """
+    seat = data["seat"].replace("省", "").replace("市", "")
+    stats = {item[0]: item[1] for item in data["stats"]}
+    return (
+        f"{data.get('intro', '')}；{data['market']}上市（{data['code']}），注册地{seat}；"
+        f"境内主体 {len(data['domestic'])} 家，穿透 {stats.get('穿透层级', '—')} 层，"
+        f"最终受益人 {stats.get('最终受益人', '—')} 位。"
+    )
+
+
+def page_head(title: str, description: str, page: str) -> str:
+    """生成 <head>：卡片标题/摘要/缩略图、favicon 与响应式声明。
+
+    微信转发链路只认页面内的信息（<title>、description、首图），
+    因此这些标签是卡片观感的唯一决定因素；og:* 用于其他平台与二次转发。
+
+    Args:
+        title: 卡片标题。
+        description: 卡片摘要。
+        page: 页面文件名（用于 og:url）。
+
+    Returns:
+        str: <head> 片段。
+    """
+    e = html.escape
+    image = f"{SITE_BASE}icon.png"
+    return f"""<head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{e(title)}</title>
+<meta name="description" content="{e(description)}">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{e(title)}">
+<meta property="og:description" content="{e(description)}">
+<meta property="og:image" content="{image}">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:url" content="{SITE_BASE}{page}">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="{image}">
+<meta name="format-detection" content="telephone=no">
+<style>{CSS}</style></head>"""
+
+
+def thumb_img() -> str:
+    """生成供抓取用的置顶缩略图（不占用版面）。
+
+    微信等平台的缩略图取页面图片，且对小图（经验值 < 300px）可能不予采用；
+    这里在 body 首位放一张 512×512 的图标（零尺寸容器包裹，不影响版式），
+    页面里可见的小图标则用于视觉呈现。
+
+    Returns:
+        str: 隐藏容器 + 512×512 图片标签。
+    """
+    return (
+        '<div style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">'
+        f'<img src="{SITE_BASE}icon.png" alt="" width="512" height="512"></div>'
+    )
+
+
+def brand_row(kicker: str, data: dict) -> str:
+    """生成抬头区的图标 + 标题行。
+
+    Args:
+        kicker: 上方小字标签。
+        data: 企业数据。
+
+    Returns:
+        str: 抬头 HTML 片段。
+    """
+    e = html.escape
+    return f"""<div class="brand">
+      <img src="icon.png" alt="" width="44" height="44">
+      <div>
+        <div class="kicker">{e(kicker)}</div>
+        <h1>{e(data["name"])} <span class="code">{e(data["code"])}</span></h1>
+      </div>
+    </div>"""
+
+
 BRIEFS: dict[str, dict] = {
     "00700": {
         "name": "腾讯控股",
         "code": "00700.HK",
+        "intro": "互联网与科技服务企业（社交、游戏、金融科技与云）",
         "market": "港股主板",
         "doc": "2025 年報（2026-04-09）",
         "seat": "广东省深圳市",
@@ -247,14 +362,14 @@ def render_brief(data: dict) -> str:
         else ""
     )
 
+    title = card_title(data, "（一页纸）")
+    desc = card_desc(data)
     return f"""<!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>商机速览 · {e(data["name"])}</title><style>{CSS}</style></head>
-<body><div class="wrap" style="--w:760px">
+<html lang="zh-CN">{page_head(title, desc, "brief.html")}
+<body>{thumb_img()}<div class="wrap" style="--w:760px">
   <div class="head">
-    <h1>{e(data["name"])} <span style="font-weight:400;color:#bbb;font-size:14px">{e(data["code"])}</span></h1>
-    <div class="meta">{e(data["market"])} · {e(data["doc"])} · 注册地 {e(data["seat"])} {juris}{ev_badge}</div>
+    {brand_row("红筹企业商机 · 一页纸速览", data)}
+    <div class="meta" style="margin-top:10px">{e(data["market"])} · {e(data["doc"])} · 注册地 {e(data["seat"])} {juris}{ev_badge}</div>
     <div class="concl">{data["conclusion"]}</div>
   </div>
 
@@ -335,16 +450,15 @@ def render_deck(data: dict, rows: list | None = None) -> str:
         else ""
     )
 
+    title = card_title(data)
+    desc = card_desc(data)
     return f"""<!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>会前简报 · {e(data["name"])}</title><style>{CSS}</style></head>
-<body><div class="wrap" style="--w:1060px">
+<html lang="zh-CN">{page_head(title, desc, "")}
+<body>{thumb_img()}<div class="wrap" style="--w:1060px">
 
   <div class="head">
-    <div style="font-size:12px;color:#a30030;letter-spacing:3px">红筹企业商机 · 会前简报</div>
-    <h1 style="margin-top:6px;color:#1a1a1a">{e(data["name"])} <span style="font-weight:400;color:#bbb;font-size:14px">{e(data["code"])}</span></h1>
-    <div class="meta">{e(data["market"])} · 披露文件：{e(data["doc"])} · 注册地 {e(data["seat"])} · <b>{e(juris)}</b>{ev_badge}</div>
+    {brand_row("红筹企业商机 · 会前简报", data)}
+    <div class="meta" style="margin-top:10px">{e(data["market"])} · 披露文件：{e(data["doc"])} · 注册地 {e(data["seat"])} · <b>{e(juris)}</b>{ev_badge}</div>
     <div class="concl">{data["conclusion"]}</div>
   </div>
 
@@ -412,11 +526,37 @@ def render_deck(data: dict, rows: list | None = None) -> str:
 </div></body></html>"""
 
 
+def ensure_icon(out_dir: Path) -> Path:
+    """确保站点目录存在图标文件（微信卡片缩略图 + 浏览器 favicon）。
+
+    优先调用同目录的生成脚本重绘（保证与配色一致），失败时退回仓库内的静态图标。
+
+    Args:
+        out_dir: 站点输出目录。
+
+    Returns:
+        Path: 图标路径。
+    """
+    target = out_dir / "icon.png"
+    try:
+        from make_icon import build_icon  # 同目录脚本
+
+        build_icon().save(target, "PNG", optimize=True)
+        return target
+    except ImportError:
+        pass
+    fallback = Path(__file__).resolve().parents[1] / "assets" / "icon.png"
+    if fallback.exists():
+        shutil.copyfile(fallback, target)
+    return target
+
+
 def main() -> None:
     """生成高管商机报告（两种风格），并输出 gh-pages 用的 index.html。"""
     cfg = config_mod.get_settings()
     out_dir = cfg.redchip_output_dir / "briefs"
     out_dir.mkdir(parents=True, exist_ok=True)
+    print(f"图标：{ensure_icon(out_dir)}")
 
     for code, data in BRIEFS.items():
         result_file = cfg.redchip_output_dir / code / "result.json"
