@@ -7,13 +7,19 @@
 - ``GET /v1/company/shareholders?q=<名称或代码>`` 股东信息（付费，1 积分/次）
 - 鉴权：``Authorization: Bearer <API_KEY>``
 
-注意两点实测结论
+注意三点实测结论
 ----------------
 1. 是 **GET + query**，不是 POST + JSON body；
 2. 该服务的 TLS 证书在 2026-09 实测时**已过期**（``CN=cnbizapi.com``，2026-04-08 起，
    约 90 天有效期）。严格校验下 httpx 会直接报 ``CERTIFICATE_VERIFY_FAILED``。
    因此这里提供显式开关 ``REDCHIP_ALLOW_EXPIRED_CERT``：仅在用户明确开启时对该域名
    放宽校验，并在每次构造客户端时记录一次警告。
+3. 官网 Python 示例确认 ``basic?q=`` **同时接受企业名称与统一社会信用代码**
+   （示例直接用了信用代码 ``91440300708461136T``）。因此本实现先按
+   :class:`IdentifierIndex` 翻译成名称（名称检索在多数数据源里更准），
+   翻译不到时把代码原样作为 ``q`` 传入——两条路都走得通。
+   另：官网 MCP 配置与注册按钮均与实际服务不符（详见当日工作记录），
+   MCP 端点实测调工具需 "instance"，官网未提供配置方式，当前不可用。
 """
 
 from __future__ import annotations
