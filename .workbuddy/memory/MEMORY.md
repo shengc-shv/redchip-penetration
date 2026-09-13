@@ -63,7 +63,11 @@ UBO 识别与解读。GitHub Actions 运行，无需服务器。
   与 `domestic/cnbiz.py` 里的 POST + JSON body 不符，接入前必须先改代码；
   ③ `get_shareholders` 属**付费工具（1 积分/次）**，免费额度只覆盖 search/basic/verify；
   ④ **官网「Get Free API Key」按钮失效**（指向 POST-only 的 `/v1/auth/register`，
-  浏览器点击必 404，且官网无注册表单）→ 用 `scripts/get_cnbizapi_key.py` 注册。
+  浏览器点击必 404，且官网无注册表单）→ 用 `scripts/get_cnbizapi_key.py` 注册；
+  ⑤ **弃更判定（2026-09-13 网络调研）**：源码库 `cnbizapi/cnbizapi-mcp` 2026-04-10 发布后
+  **5 个月零维护**（仅 1 个 commit），唯一用户 issue（8-25「注册了但没额度」，与实测一致）
+  **无人回应**；basic 查华为/阿里/腾讯全 404 → **数据层空库，不建议等待**，
+  真实数据走启信宝（0.015 元/次起）/企查查/行内渠道。
 
 ## 常用命令
 ```bash
