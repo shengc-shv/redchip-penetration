@@ -102,13 +102,19 @@ class Stakeholder(BaseModel):
 
 
 def build_stakeholders(
-    report: CompanyReport, target_province: str = "广东省"
+    report: CompanyReport,
+    target_province: str = "广东省",
+    disclosed_persons: list[dict[str, str]] | None = None,
 ) -> list[Stakeholder]:
     """从穿透结果推导干系人作战表。
 
     Args:
         report: 穿透结果（含节点、UBO、VIE 协议当事人、披露股东）。
         target_province: 本行属地省份，用于判定「辖内 / 非辖内」。
+        disclosed_persons: **披露口径确认的自然人干系人**（如年报第XV部注释指明的
+            持股平台实控人）。工商穿透不可用时（数据源故障/仅凭披露文件分析），
+            UBO 穿透会空缺，此时若无本参数，披露已确认的决策人会被错误归类为
+            「VIE 名义持股人」。每项至少含 ``name`` 与 ``basis``（溯源说明）。
 
     Returns:
         list[Stakeholder]: 按优先级与可触达性排序的干系人列表。
@@ -131,10 +137,38 @@ def build_stakeholders(
     }
     disclosed_names = {h.get("name", "") for h in report.crosscheck.get("disclosed", [])}
 
+    # 披露口径确认的决策人：优先级高于图谱推导（它们有法定披露文件背书）
+    disclosed_map = {
+        str(item.get("name", "")): item
+        for item in (disclosed_persons or [])
+        if item.get("name")
+    }
+
     rows: list[Stakeholder] = []
+
+    def _disclosed_row(name: str, item: dict[str, str]) -> Stakeholder:
+        """构造披露口径决策人行。"""
+        return Stakeholder(
+            name=name,
+            category="自然人",
+            role="最终决策人（披露口径确认）",
+            needs="私人银行、家族财富安排",
+            hook="上市主体权益安排与个人财富管理",
+            reach=2,
+            priority="B",
+            note=(
+                f"依据：{item.get('basis', '公开披露文件')}；"
+                "境内工商登记口径待行内渠道核验"
+            ),
+        )
 
     for node in report.nodes:
         if isinstance(node, PersonNode):
+            disclosed = disclosed_map.get(node.name)
+            if disclosed is not None:
+                # 有披露文件背书的决策人：按披露口径出行，不做穿透推断
+                rows.append(_disclosed_row(node.name, disclosed))
+                continue
             rows.append(
                 _person_row(
                     node,
@@ -151,11 +185,26 @@ def build_stakeholders(
         if rule is None:
             continue
         region = node.city or node.province or ""
-        in_region = bool(node.province == target_province)
+        # 属地三态：True=辖内 / False=明确非辖内 / None=未知（工商口径缺失时常见）。
+        # 未知不能按「非辖内」处理——那会把辖内主体错误降档，误导作战优先级
+        if node.province:
+            in_region: bool | None = node.province == target_province
+        elif kind in ("wfoe", "opco", "gov", "unknown"):
+            in_region = None
+        else:
+            in_region = False
         reach = int(rule["reach"])  # type: ignore[arg-type]
-        if reach == 3 and not in_region:
-            # 境内但非辖内：可触达性降一档，且优先级下调
+        if reach == 3 and in_region is False:
+            # 明确的境内非辖内主体：可触达性降一档
             reach = 2
+        if kind in ("listed", "offshore", "hk"):
+            note = ""
+        elif in_region is True:
+            note = "辖内，可独立承接"
+        elif in_region is False:
+            note = "非辖内，须属地联动"
+        else:
+            note = "属地待核验（工商登记口径缺失，建议行内核验属地后定级）"
         rows.append(
             Stakeholder(
                 name=node.name,
@@ -166,7 +215,7 @@ def build_stakeholders(
                 reach=reach,  # type: ignore[arg-type]
                 region=region or ("境外" if kind in ("listed", "offshore", "hk") else ""),
                 priority=_priority_for(kind, reach, in_region),
-                note="" if in_region or kind in ("listed", "offshore", "hk") else "非辖内，须属地联动",
+                note=note,
             )
         )
 
@@ -197,6 +246,12 @@ def build_stakeholders(
             note="工商穿透若发现「有限合伙」类股东，应升级为 A 级首触点",
         )
     )
+
+    # 披露口径确认、但图谱中无人节点的决策人（如工商穿透空缺时）也要出行
+    seen_names = {row.name for row in rows}
+    for name, item in disclosed_map.items():
+        if name not in seen_names:
+            rows.append(_disclosed_row(name, item))
 
     order = {"A": 0, "B": 1, "C": 2}
     rows.sort(key=lambda r: (order[r.priority], -int(r.reach), r.name))
@@ -274,18 +329,18 @@ def _person_row(
     )
 
 
-def _priority_for(kind: str, reach: int, in_region: bool) -> Literal["A", "B", "C"]:
+def _priority_for(kind: str, reach: int, in_region: bool | None) -> Literal["A", "B", "C"]:
     """按主体类型与可触达性判定优先级。
 
     Args:
         kind: 节点角色。
         reach: 可触达性等级。
-        in_region: 是否辖内。
+        in_region: 是否辖内；None 表示属地未知（按待核验处理，不给 A 级）。
 
     Returns:
         Literal["A", "B", "C"]: 优先级。
     """
-    if kind in ("wfoe", "opco") and in_region:
+    if kind in ("wfoe", "opco") and in_region is True:
         return "A"
     if kind in ("wfoe", "opco"):
         return "B"

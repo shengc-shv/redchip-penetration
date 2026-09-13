@@ -240,7 +240,19 @@ BRIEFS: dict[str, dict] = {
             "腾讯科技（深圳）有限公司（WFOE）",
             "深圳市腾讯计算机系统有限公司（VIE 运营实体）",
         ],
-        "ubo": "马化腾（境内 VIE 登记持股 54.29%）",
+        "ubo": (
+            "马化腾（披露口径：经其全资持股平台 Advance Data Services Limited "
+            "持有上市主体 8.82%，年报 p.79 注释 2；境内 VIE 登记比例待行内工商核验）"
+        ),
+        "disclosed_persons": [
+            {
+                "name": "马化腾",
+                "basis": (
+                    "2025 年報 p.79 第XV部：Advance Data Services Limited (8.82%) "
+                    "由其全资持有（注释 2）"
+                ),
+            }
+        ],
         "disclosed": "MIH Internet Holdings B.V. 22.80%、Advance Data Services Limited 8.82%",
         "conclusion": (
             "架构清晰、境内主体在深圳且属<b>辖内</b>。成熟期互联网巨头的主体授信非分行角色，"
@@ -597,7 +609,11 @@ def main() -> None:
             )
             # 披露时点以穿透结果为准，避免手工维护漂移
             data["doc"] = f"{report.doc_kind}（{report.doc_published_at}）"
-            rows = build_stakeholders(report, target_province=data["target_province"])
+            rows = build_stakeholders(
+                report,
+                target_province=data["target_province"],
+                disclosed_persons=data.get("disclosed_persons"),
+            )
             data["evidence"] = report.evidence or {}
             data["onshore"] = report.onshore_signals or []
             print(
