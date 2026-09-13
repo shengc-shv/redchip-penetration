@@ -2,32 +2,60 @@
 
 ## 项目定位
 分析港美股红筹架构（开曼/BVI → 香港 → 境内 WFOE → VIE 运营实体）企业的股权穿透、
-UBO 识别与 LLM 解读。运行时为 GitHub Actions，无需服务器。
+UBO 识别与解读。GitHub Actions 运行，无需服务器。
+仓库 <https://github.com/shengc-shv/redchip-penetration>；报告站点在 gh-pages 分支
+（<https://shengc-shv.github.io/redchip-penetration/>，微信转发卡片用）。
 
 ## 阶段划分
-- 阶段一（已完成）：港股模块
-- 阶段二（待做）：美股 20-F（EdgarTools），骨架见 `src/redchip/overseas/sec.py`
+- 阶段一（已完成）：港股模块（自研 HKEXnews 抓取，非 ah-disclosure-kit）
+- 阶段二（已完成）：美股模块（SEC EDGAR 官方 REST API，非 edgartools）
+
+## ⚠️ 数据真实性边界（最容易混淆，务必先看这张表）
+| 数据 | 需注册？ | 当前实际来源 | 真实吗 |
+|---|---|---|---|
+| 港交所披露易（年报/招股书） | 不需要 | 官方公开接口真实下载 | ✅ 真实 |
+| SEC EDGAR（20-F） | 不需要（仅 UA） | 官方 REST API 真实下载 | ✅ 真实 |
+| 境内工商（CNBizAPI） | **需要 Key** | `fixtures/cnbiz/sample.json`（**手写示意数据**） | ❌ 非真实 |
+| LLM 解读 | 需要 Key | `fixtures/manual/<code>_llm_a.json`（WorkBuddy 本地分析） | 分析真、输入含样例 |
+| Neo4j / graphviz | 可选 | 未配置 → 静默跳过 / 降级自绘 SVG | — |
+
+**结论：境内持股比例（如腾讯马化腾 54.29%）目前是算法验证口径，不是核出来的事实；
+对外交付前必须接入真实工商数据源。** 境外披露口径的数字（如 MIH 22.80%、Advance Data 8.82%）是真实的。
+代码里的降级开关：`cnbiz.py` 中 `self.mock = settings.redchip_mock or not cnbizapi_key`。
 
 ## 硬性约定
-- **时区**：全局唯一常量 `redchip.config.CST`（Asia/Shanghai）。禁止 `datetime.now()` 无时区调用、
-  禁止 env 覆盖、禁止回落系统时区。
-- **LLM 调用点只能有两个**：`llm_a`（架构提取）与 `llm_b`（审查+报告）。不新增第三个。
-- **广东省过滤必须在 LLM-A 之后**：先用全量候选让 LLM 完成 WFOE 消歧，确认实体后再过滤，
-  否则可能剔除正确实体。零额外 token。
-- **披露文件时间只取官方字段**（HKEX 的 `DATE_TIME`），**不得用抓取日期兜底**；解析失败留空。
-- **降级优先于中断**：抓取 / LLM / Neo4j / PNG 任一环节失败都只记 `errors` 并标记需人工复核，
-  不阻断后续步骤。
-- **节点去重**：公司节点 id 优先取统一社会信用代码；无代码时按「名称+注册地」复用，
-  有代码时也要先按名称查重并补全代码。
+- **时区**：唯一常量 `redchip.config.CST`（Asia/Shanghai）。禁止无时区 `datetime.now()`、禁止 env 覆盖。
+- **LLM 调用点只有两个**：`llm_a`（架构提取）与 `llm_b`（审查+报告）。
+- **地域过滤必须在 LLM-A 之后**（先全量候选消歧再过滤），默认广东省，可按目标覆盖。
+- **披露时间只取官方字段**（HKEX `DATE_TIME`、SEC `filingDate`），**不得用抓取日兜底**。
+- **降级优先于中断**：抓取/LLM/Neo4j/渲染任一失败只记 `errors` + 标记需人工复核，不阻断。
+- **节点去重**：优先统一社会信用代码；无代码按「名称+注册地」复用，有代码也先按名称查重。
+- **报告只呈现事实信息**：不要输出时间安排、排期、行动建议（用户方自有打法）；
+  LLM-B 提示词已加此约束。
+
+## 关键实现位置
+- 卡片元信息/图标：`scripts/make_brief.py`（card_title/card_desc/page_head/thumb_img）、`scripts/make_icon.py`
+- 证据等级 L1~L4：`models/evidence.py`；境内反推（**仅广东**）：`domestic/onshore.py`
+- 交叉验证（披露↔工商）：`verify/crosscheck.py`、`verify/shareholders.py`（中英双通道）
+- 美股 HTML 表格解析（Item 7）：`overseas/htmltable.py`
+- 红筹判定口径：注册地+上市地均在境外即为红筹；按控制人分国资/民营，按控制方式分股权/协议（VIE）。
 
 ## 已知不可用的外部依赖（勿再尝试）
-- `ah-disclosure-kit`：PyPI 不存在（404）。港股抓取一律走自研 `overseas/hkex.py`。
-- 本地 `brew install graphviz` 被沙箱拦截；渲染依赖 dot 时要能降级到自绘 SVG。
+- `ah-disclosure-kit`：PyPI 404。港股走自研 `overseas/hkex.py`。
+- `edgartools`：本环境安装不稳定，改用 SEC 官方 REST API。
+- `brew install graphviz` 被沙箱拦截；渲染需能降级到自绘 SVG。
+- 港交所 DI 权益披露站直连不可用（旧接口 302 弃用）→ 改用年报第XV部章节 + 披露易申报表。
+- **CNBizAPI（2026-09-13 实测）**：服务真实存在（7700 万+企业，邮箱注册，免费 200 次/月），
+  但 ① **TLS 证书已过期**，httpx 默认校验直接连不上；② 真实接口是 **GET + query**
+  （`/v1/company/search?keyword=`、`/basic?q=`、`/shareholders?q=`），
+  与 `domestic/cnbiz.py` 里的 POST + JSON body 不符，接入前必须先改代码；
+  ③ `get_shareholders` 属**付费工具（1 积分/次）**，免费额度只覆盖 search/basic/verify。
 
 ## 常用命令
 ```bash
-PYTHONPATH=src python -m redchip.cli run --code 00700 --mock   # 离线跑通
-PYTHONPATH=src python -m redchip.cli run --all                  # 全量港股
-PYTHONPATH=src python -m pytest tests -q                        # 33 个单测
-export STOCK_CODES=00700 && python scripts/*.py 依次执行          # 分步
+PYTHONPATH=src python -m redchip.cli run --code 00700        # 港股真实抓取
+PYTHONPATH=src python -m redchip.cli run --code BABA         # 美股真实抓取
+PYTHONPATH=src python -m redchip.cli run --code 00700 --mock # 全离线
+PYTHONPATH=src python scripts/make_brief.py                  # 生成高管报告 + 站点页
+PYTHONPATH=src python -m pytest tests -q                     # 67 个单测
 ```

@@ -82,16 +82,39 @@ python scripts/overseas_hkex.py && python scripts/llm_a.py \
 在仓库 **Settings → Secrets and variables → Actions** 中配置，变量名如下（代码已全部引用，
 **未配置时会自动降级，不会中断流水线**）：
 
-| Secret | 用途 | 未配置的后果 |
+| Secret / Variable | 用途 | 未配置的后果 |
 | --- | --- | --- |
-| `CNBIZAPI_KEY` | 境内工商数据（免费 200 次/月） | 走 `fixtures/cnbiz` 样例数据 |
+| `CNBIZAPI_KEY` | 境内工商数据（CNBizAPI，免费 200 次/月） | 依次尝试下一数据源，最终走 `fixtures/cnbiz` 样例 |
+| `QCC_APP_KEY` / `QCC_SECRET_KEY` | 境内工商数据（企查查开放平台，需企业实名认证） | 同上 |
+| `REGISTRY_SOURCE`（Variable） | 强制指定数据源：`auto` / `cnbizapi` / `qcc` / `fixture` | 默认 `auto`，按可用密钥自动选择 |
+| `REDCHIP_ALLOW_EXPIRED_CERT`（Variable） | 放宽工商数据源 TLS 校验（服务方证书过期时的临时兜底） | 默认 `false`，严格校验 |
 | `LLM_API_KEY` | LLM-A / LLM-B | 规则兜底提取，结果标记「需人工复核」 |
 | `LLM_BASE_URL` | OpenAI 兼容端点，默认 `https://api.deepseek.com` | 同上 |
 | `LLM_MODEL` | 默认 `deepseek-chat` | 同上 |
 | `NEO4J_PASSWORD` | Neo4j Service Container 密码 | 用默认 `redchip_dev`，仅本地容器 |
-| `SEC_IDENTITY` | 阶段二美股用，格式 `"项目名 邮箱"` | 美股模块未启用，无影响 |
+| `SEC_IDENTITY` | 美股用，格式 `"项目名 邮箱"` | 使用默认示例值 |
 
 本地联调可写入 `.env`（已在 `.gitignore` 中）。
+
+## 境内工商数据源（可切换）
+
+穿透层以**统一社会信用代码**为主键，而各数据源普遍按**企业名称**检索，
+因此接入层（`src/redchip/domestic/sources/`）做了两件事：抹平各家字段命名差异，
+并用 `IdentifierIndex` 维护名称↔代码映射（由搜索与基本信息接口自动回填，零额外请求）。
+
+| 数据源 | 免费额度 | 开通门槛 | 备注 |
+| --- | --- | --- | --- |
+| **CNBizAPI** | 200 次/月（持续） | 邮箱注册即用 | 实测接口为 `GET + query`；**TLS 证书已过期**，需 `REDCHIP_ALLOW_EXPIRED_CERT=true` 或等对方续证 |
+| **企查查开放平台** | 每接口 20 次（一次性） | **企业实名 + 应用场景审核** | 含股东信息的「企业工商详情」2 元/次；签名 `MD5(key+Timespan+SecretKey)` |
+| **离线样例** | 不限 | 无 | 自动兜底，数据为示意口径，**不得当作核验事实** |
+
+新增数据源只需实现 `CompanyDataSource` 协议（搜索 / 基本信息 / 股东三个方法）
+并在 `build_source()` 登记，穿透层无需改动。
+
+> **数据定位**：本项目的报告基于**公开披露 + 商业工商数据源**在行外生成，用于**线索初筛**；
+> 涉及客户准入、授信与合规的结论，须经行内渠道数据复核（报告页顶部已作声明）。
+> 官方权威口径可用国家企业信用信息公示系统的人工查询通道核验
+> （实名登录后可申请 PDF 版《企业信用信息公示报告》），该系统无程序化接口。
 
 ## 输出产物
 

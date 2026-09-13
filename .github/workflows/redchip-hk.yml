@@ -46,8 +46,14 @@ jobs:
       NEO4J_USER: neo4j
       NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD || 'redchip_dev' }}
       # 数据源密钥：未配置时自动降级，不会中断流水线
+      # registry_source=auto 时的选择顺序：CNBizAPI Key → 企查查密钥 → 离线样例
+      REGISTRY_SOURCE: ${{ vars.REGISTRY_SOURCE || 'auto' }}
       CNBIZAPI_KEY: ${{ secrets.CNBIZAPI_KEY }}
       CNBIZAPI_BASE_URL: ${{ secrets.CNBIZAPI_BASE_URL || 'https://api.cnbizapi.com' }}
+      QCC_APP_KEY: ${{ secrets.QCC_APP_KEY }}
+      QCC_SECRET_KEY: ${{ secrets.QCC_SECRET_KEY }}
+      # 服务方 TLS 证书过期时的临时兜底（会失去中间人防护，尽量只作过渡）
+      REDCHIP_ALLOW_EXPIRED_CERT: ${{ vars.REDCHIP_ALLOW_EXPIRED_CERT || 'false' }}
       LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
       LLM_BASE_URL: ${{ secrets.LLM_BASE_URL || 'https://api.deepseek.com' }}
       LLM_MODEL: ${{ secrets.LLM_MODEL || 'deepseek-chat' }}

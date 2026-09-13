@@ -43,6 +43,20 @@ class Settings(BaseSettings):
     # ---------- 境内工商数据源 ----------
     cnbizapi_key: str = Field(default="", description="CNBizAPI Key，形如 cbz_xxxx")
     cnbizapi_base_url: str = Field(default="https://api.cnbizapi.com")
+    registry_source: str = Field(
+        default="auto",
+        description="工商数据源：auto（按可用密钥自动选）/ cnbizapi / qcc / fixture",
+    )
+    redchip_allow_expired_cert: bool = Field(
+        default=False,
+        description=(
+            "放宽工商数据源的 TLS 证书校验。仅用于服务方证书过期的临时兜底"
+            "（如 CNBizAPI 2026-09 实测证书过期），开启后失去中间人防护，请尽快推动对方续证"
+        ),
+    )
+    qcc_app_key: str = Field(default="", description="企查查开放平台 AppKey")
+    qcc_secret_key: str = Field(default="", description="企查查开放平台 SecretKey")
+    qcc_base_url: str = Field(default="https://api.qichacha.com")
 
     # ---------- LLM ----------
     llm_api_key: str = Field(default="")
