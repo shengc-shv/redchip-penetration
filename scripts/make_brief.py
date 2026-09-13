@@ -32,47 +32,48 @@ from redchip.models.schema import CompanyReport
 # 用色克制、不加大圆角与重阴影，贴近正式报告的观感
 CSS = """
 * { box-sizing: border-box; }
-body { margin: 0; padding: 24px 14px 56px; background: #f4f4f5;
+body { margin: 0; padding: 24px 14px 56px; background: #f7f7f8;
   font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, Helvetica, sans-serif;
-  color: #2b2b2b; -webkit-font-smoothing: antialiased; line-height: 1.65; }
+  color: #333; -webkit-font-smoothing: antialiased; line-height: 1.65; }
 .wrap { max-width: var(--w, 760px); margin: 0 auto; }
-.card { background: #fff; border: 1px solid #e6e6e8; border-radius: 4px;
-  padding: 18px 20px; margin-bottom: 12px; }
-.head { background: #c7000b; color: #fff; border: none; border-radius: 4px;
-  padding: 20px 22px; margin-bottom: 12px; }
-.head h1 { margin: 0 0 6px; font-size: 21px; font-weight: 600; letter-spacing: .5px; }
-.head .meta { font-size: 12.5px; opacity: .85; }
-.head .concl { margin-top: 14px; padding: 12px 14px; background: rgba(255,255,255,.13);
-  border-left: 3px solid #f0c987; border-radius: 2px; font-size: 14px; line-height: 1.7; }
+.card { background: #fff; border: 1px solid #e8e8e8; border-radius: 3px;
+  padding: 18px 20px; margin-bottom: 10px; }
+/* 抬头区：白底 + 顶部细红线，红色只做点睛，不做大面积色块 */
+.head { background: #fff; border: 1px solid #e8e8e8; border-top: 3px solid #a30030;
+  border-radius: 3px; padding: 20px 22px; margin-bottom: 10px; }
+.head h1 { margin: 0 0 6px; font-size: 21px; font-weight: 600; color: #1a1a1a; letter-spacing: .5px; }
+.head .meta { font-size: 12.5px; color: #999; }
+.head .concl { margin-top: 14px; padding: 12px 14px; background: #fafafa;
+  border-left: 3px solid #a30030; border-radius: 2px; font-size: 14px; line-height: 1.75; color: #333; }
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.stat { background: #fff; border: 1px solid #e6e6e8; border-radius: 4px; padding: 11px 13px; }
-.stat .k { font-size: 11.5px; color: #8a8a8f; }
-.stat .v { font-size: 18px; font-weight: 700; margin-top: 3px; color: #c7000b; }
-.stat .u { font-size: 11px; color: #a8a8ad; font-weight: 400; margin-left: 2px; }
+.stat { background: #fff; border: 1px solid #e8e8e8; border-radius: 3px; padding: 11px 13px; }
+.stat .k { font-size: 11.5px; color: #999; }
+.stat .v { font-size: 18px; font-weight: 700; margin-top: 3px; color: #a30030; }
+.stat .u { font-size: 11px; color: #bbb; font-weight: 400; margin-left: 2px; }
 h2 { font-size: 14.5px; margin: 20px 0 10px; display: flex; align-items: center; gap: 8px;
   color: #1a1a1a; }
-h2 .bar { width: 3px; height: 14px; border-radius: 1px; background: #c7000b; }
-.opp { border-left: 2px solid #dcdce0; padding: 9px 0 9px 14px; margin-bottom: 12px; }
-.opp.a { border-color: #c7000b; } .opp.b { border-color: #b8944d; } .opp.c { border-color: #b9b9be; }
-.opp .t { font-size: 14px; font-weight: 600; }
-.opp .row { font-size: 12.5px; color: #5a5a60; margin-top: 4px; }
-.opp .row b { color: #1a1a1a; font-weight: 600; }
+h2 .bar { width: 3px; height: 14px; border-radius: 1px; background: #a30030; }
+.opp { border-left: 2px solid #e0e0e0; padding: 9px 0 9px 14px; margin-bottom: 12px; }
+.opp.a { border-color: #a30030; } .opp.b { border-color: #b8944d; } .opp.c { border-color: #c4c4c4; }
+.opp .t { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.opp .row { font-size: 12.5px; color: #666; margin-top: 4px; }
+.opp .row b { color: #333; font-weight: 600; }
 .tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 2px;
   font-weight: 600; margin-right: 6px; vertical-align: 1px; }
-.tag.a { background: #fbe9e9; color: #a80009; }
-.tag.b { background: #f7f0e2; color: #8a6c2f; }
-.tag.c { background: #eeeef0; color: #56565c; }
-.tag.n { background: #e8f2e9; color: #2f6b38; }
-.tag.w { background: #fbe9e9; color: #a80009; }
+.tag.a { background: #fbeff2; color: #92022c; }
+.tag.b { background: #faf5ec; color: #8a6c2f; }
+.tag.c { background: #f2f2f3; color: #666; }
+.tag.n { background: #eef4ef; color: #2f6b38; }
+.tag.w { background: #fbeff2; color: #92022c; }
 table { width: 100%; border-collapse: collapse; font-size: 12.6px; }
-th { text-align: left; font-weight: 600; color: #56565c; background: #fafafa;
-  padding: 8px 10px; border-bottom: 1.5px solid #c7000b; font-size: 12px; }
-td { padding: 8px 10px; border-bottom: 1px solid #f0f0f2; vertical-align: top; line-height: 1.6; }
-td.k { color: #8a8a8f; width: 128px; }
-.muted { color: #7a7a80; font-size: 12px; line-height: 1.7; }
-.foot { text-align: center; color: #a0a0a5; font-size: 11.5px; margin-top: 20px; line-height: 1.8; }
+th { text-align: left; font-weight: 600; color: #666; background: #fafafa;
+  padding: 8px 10px; border-bottom: 2px solid #a30030; font-size: 12px; }
+td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; line-height: 1.6; }
+td.k { color: #999; width: 128px; }
+.muted { color: #666; font-size: 12px; line-height: 1.7; }
+.foot { text-align: center; color: #b0b0b0; font-size: 11.5px; margin-top: 20px; line-height: 1.8; }
 .pill { display:inline-block; padding:1px 6px; border-radius:2px; font-size:11px;
-  background:#f4f4f5; color:#56565c; margin-right:5px; }
+  background:#f7f7f8; color:#666; margin-right:5px; }
 @media (max-width: 640px) {
   .stats { grid-template-columns: repeat(2, 1fr); }
   body { padding: 16px 10px 40px; }
@@ -244,7 +245,7 @@ def render_brief(data: dict) -> str:
 <title>商机速览 · {e(data["name"])}</title><style>{CSS}</style></head>
 <body><div class="wrap" style="--w:760px">
   <div class="head">
-    <h1>{e(data["name"])} <span style="font-weight:400;opacity:.7;font-size:14px">{e(data["code"])}</span></h1>
+    <h1>{e(data["name"])} <span style="font-weight:400;color:#bbb;font-size:14px">{e(data["code"])}</span></h1>
     <div class="meta">{e(data["market"])} · {e(data["doc"])} · 注册地 {e(data["seat"])} {juris}</div>
     <div class="concl">{data["conclusion"]}</div>
   </div>
@@ -316,8 +317,8 @@ def render_deck(data: dict, rows: list | None = None, paths: list | None = None)
 <body><div class="wrap" style="--w:1060px">
 
   <div class="head">
-    <div style="font-size:12px;opacity:.75;letter-spacing:3px">红筹企业商机 · 会前简报</div>
-    <h1 style="margin-top:6px">{e(data["name"])} <span style="font-weight:400;opacity:.7;font-size:14px">{e(data["code"])}</span></h1>
+    <div style="font-size:12px;color:#a30030;letter-spacing:3px">红筹企业商机 · 会前简报</div>
+    <h1 style="margin-top:6px;color:#1a1a1a">{e(data["name"])} <span style="font-weight:400;color:#bbb;font-size:14px">{e(data["code"])}</span></h1>
     <div class="meta">{e(data["market"])} · 披露文件：{e(data["doc"])} · 注册地 {e(data["seat"])} · <b>{e(juris)}</b></div>
     <div class="concl">{data["conclusion"]}</div>
   </div>
