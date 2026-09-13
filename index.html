@@ -74,8 +74,28 @@ td.k { color: #999; width: 128px; }
   body { padding: 16px 10px 40px; }
   table { font-size: 12px; }
 }
+/* 定位声明条：行外初筛结果的必要提示，必须显眼但不能喧宾夺主 */
+.notice { background: #fdf7f8; border: 1px solid #f0dde2; border-left: 3px solid #a30030;
+  border-radius: 3px; padding: 9px 12px; font-size: 12px; color: #7a4a55;
+  line-height: 1.7; margin-bottom: 10px; }
+.notice b { color: #92022c; }
+.printbtn { position: fixed; right: 18px; bottom: 18px; padding: 8px 14px; font-size: 13px;
+  background: #fff; border: 1px solid #d8d8d8; border-radius: 3px; color: #a30030;
+  cursor: pointer; font-family: inherit; }
+.printbtn:hover { border-color: #a30030; }
+/* 行内网络若访问不了外部站点，可用浏览器直接打印或存为 PDF 传阅 */
+@media print {
+  body { background: #fff; padding: 0; }
+  .wrap { max-width: none; }
+  .printbtn, .thumb { display: none !important; }
+  .card, .head, .opp, table { break-inside: avoid; }
+  .notice { background: #fff; }
+  .foot { color: #888; }
+  @page { margin: 12mm; }
+}
 </style></head>
 <body><div style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><img src="https://shengc-shv.github.io/redchip-penetration/icon.png" alt="" width="512" height="512"></div><div class="wrap" style="--w:1060px">
+  <div class="notice"><b>行外公开信息初筛</b> · 本页数据取自公开披露文件与商业工商数据源，仅用于线索发现；涉及客户准入、授信与合规的判断，须以行内渠道数据复核为准。</div>
 
   <div class="head">
     <div class="brand">
@@ -163,4 +183,5 @@ td.k { color: #999; width: 128px; }
     数据来源：公开披露文件（annual_report（2026-04-09））+ 境内工商登记 · 由红筹架构穿透系统自动抽取<br>
     企业信息均取自公开渠道；具体数字（人员规模、资金体量等）需业务部门另行核实
   </div>
+  <button class="printbtn" onclick="window.print()">打印 / 存为 PDF</button>
 </div></body></html>
