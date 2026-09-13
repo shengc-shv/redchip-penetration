@@ -23,6 +23,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from redchip import config as config_mod
+from redchip.brief.stakeholders import build_paths, build_stakeholders, to_csv
+from redchip.models.schema import CompanyReport
 
 CSS = """
 * { box-sizing: border-box; }
@@ -79,6 +81,7 @@ BRIEFS: dict[str, dict] = {
         "market": "港股主板",
         "doc": "2025 年報（2026-04-09）",
         "seat": "广东省深圳市",
+        "target_province": "广东省",
         "jurisdiction": "辖内",
         "chain": "开曼上市主体 → BVI → 香港 → 腾讯科技（深圳）→ VIE → 深圳市腾讯计算机系统",
         "domestic": ["腾讯科技（深圳）有限公司（WFOE）", "深圳市腾讯计算机系统有限公司（VIE 运营实体）"],
@@ -145,6 +148,7 @@ BRIEFS: dict[str, dict] = {
         "market": "美股（20-F）",
         "doc": "FY2026 20-F（2026-05-20）",
         "seat": "浙江省杭州市",
+        "target_province": "浙江省",
         "jurisdiction": "非辖内",
         "chain": "开曼上市主体 → 离岸/香港层 → 阿里巴巴（中国）/ 淘宝（中国）软件 → VIE → 浙江淘宝网络、浙江天猫网络",
         "domestic": [
@@ -288,15 +292,19 @@ def render_brief(data: dict) -> str:
 </div></body></html>"""
 
 
-def render_deck(data: dict) -> str:
-    """风格 B：会前简报。
+def render_deck(data: dict, rows: list | None = None, paths: list | None = None) -> str:
+    """风格 B：会前简报（首战指挥版）。
 
     Args:
         data: 企业商机数据。
+        rows: 干系人作战表。
+        paths: 接触路径。
 
     Returns:
         str: HTML 文档。
     """
+    rows = rows or []
+    paths = paths or []
     e = html.escape
     matrix = "".join(
         f'<tr><td><b>{e(t)}</b></td><td>{e(who)}</td><td>{_tag(level)}</td><td>{e(why)}</td></tr>'
@@ -309,6 +317,24 @@ def render_deck(data: dict) -> str:
     notes = "".join(f"<li>{n}</li>" for n in data["notes"])
     domestic = "".join(f"<li>{e(d)}</li>" for d in data["domestic"])
     juris = "辖内" if data["jurisdiction"] == "辖内" else "非辖内（跨区）"
+
+    def _p_tag(p: str) -> str:
+        cls = {"A": "a", "B": "b", "C": "c"}[p]
+        return f'<span class="tag {cls}">{p} 级</span>'
+
+    stakeholder_rows = "".join(
+        f"<tr><td>{_p_tag(r.priority)}</td><td><b>{e(r.name)}</b></td>"
+        f"<td>{e(r.role)}</td><td>{e(r.needs)}</td><td>{e(r.hook)}</td>"
+        f"<td>{e(r.reach_label)}</td>"
+        f"<td class='muted'>{e(r.note)}</td></tr>"
+        for r in rows
+    )
+    path_cards = "".join(
+        f'<div style="padding:10px 0;border-bottom:1px dashed #e2e8f0">'
+        f'<div style="font-weight:600;font-size:13.5px">{e(name)}</div>'
+        f'<div class="muted" style="margin-top:4px">{e(desc)}</div></div>'
+        for name, desc in paths
+    )
 
     return f"""<!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="utf-8">
@@ -364,13 +390,32 @@ def render_deck(data: dict) -> str:
   </div>
 
   <div class="card">
-    <h2 style="margin-top:0"><span class="bar"></span>④ 90 天行动表</h2>
+    <h2 style="margin-top:0"><span class="bar"></span>④ 干系人作战表（首战切入点）</h2>
+    <table>
+      <thead><tr><th style="width:56px">优先级</th><th style="width:18%">干系人</th>
+      <th style="width:18%">角色定位</th><th style="width:16%">需求落点</th>
+      <th style="width:18%">切入由头</th><th style="width:13%">可触达性</th><th>备注</th></tr></thead>
+      <tbody>{stakeholder_rows}</tbody>
+    </table>
+    <div class="muted" style="margin-top:10px">
+      优先级判定：辖内主体可独立承接为 A；需引荐或联动为 B；离岸层与名义持股人为 C。
+      <b>标注「名义持股人」的干系人不得作为营销对象</b>。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0"><span class="bar"></span>⑤ 接触路径（从谁撬动谁）</h2>
+    {path_cards}
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0"><span class="bar"></span>⑥ 90 天行动表</h2>
     <table><thead><tr><th style="width:110px">责任</th><th>动作</th><th style="width:70px">时限</th></tr></thead>
     <tbody>{actions}</tbody></table>
   </div>
 
   <div class="card">
-    <h2 style="margin-top:0"><span class="bar"></span>⑤ 合规与边界</h2>
+    <h2 style="margin-top:0"><span class="bar"></span>⑦ 合规与边界</h2>
     <div class="muted"><ul style="margin:0;padding-left:18px">{notes}</ul></div>
   </div>
 
@@ -394,10 +439,21 @@ def main() -> None:
             result = json.loads(result_file.read_text(encoding="utf-8"))
             data["doc"] = f"{result.get('doc_kind', '')}（{result.get('doc_published_at', '')}）"
 
+        rows: list = []
+        paths: list = []
+        if result_file.exists():
+            report = CompanyReport.model_validate(
+                json.loads(result_file.read_text(encoding="utf-8"))
+            )
+            rows = build_stakeholders(report, target_province=data["target_province"])
+            paths = build_paths(rows)
+            csv_path = to_csv(rows, out_dir / f"{code}_{data['name']}_干系人线索.csv")
+            print(f"  → 干系人 {len(rows)} 条：{csv_path.name}")
+
         brief = out_dir / f"{code}_{data['name']}_一页纸速览.html"
         deck = out_dir / f"{code}_{data['name']}_会前简报.html"
         brief.write_text(render_brief(data), encoding="utf-8")
-        deck.write_text(render_deck(data), encoding="utf-8")
+        deck.write_text(render_deck(data, rows, paths), encoding="utf-8")
         print(f"{code} {data['name']}：{brief.name} / {deck.name}")
 
     print(f"\n输出目录：{out_dir}")
