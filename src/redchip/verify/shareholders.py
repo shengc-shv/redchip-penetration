@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterable
+from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -233,23 +234,54 @@ def _soft_unwrap(text: str, min_line: int = 80) -> str:
     return "\n".join(out)
 
 
-def extract_en_holders(text: str, source_page: str = "") -> list[DisclosedHolder]:
+def extract_narrative_holders(text: str, source_page: str = "") -> list[DisclosedHolder]:
+    """只抽取「叙述式」表述（中文表 + 英文 beneficially owns 句式）。
+
+    用在美股场景：20-F 的股东表已由 HTML 表格通道结构化解析，
+    若再对同一份文档跑文本表格行正则，只会引入
+    「Eddie Yongming WU 19,706,418」这类把数字列当名字的噪声。
+
+    Args:
+        text: 披露文本。
+        source_page: 源页码标记。
+
+    Returns:
+        list[DisclosedHolder]: 抽取结果。
+    """
+    holders = extract_disclosed_holders(text, source_page=source_page)
+    holders.extend(
+        extract_en_holders(text, source_page=source_page, modes=("narrative",))
+    )
+    return _dedupe_holders(holders)
+
+
+def extract_en_holders(
+    text: str,
+    source_page: str = "",
+    modes: tuple[str, ...] = ("table", "narrative"),
+) -> list[DisclosedHolder]:
     """从英文披露中抽取「名称 + 持股百分比」。
 
     覆盖两种写法：
-    1. 表格行：``Naspers Limited  2,548,xxx,xxx  24.09%``
-    2. 叙述句：``Ma Huateng beneficially owns approximately 8.63% ...``
+    1. 表格行（``modes`` 含 ``table``）：``Naspers Limited  2,548,xxx,xxx  24.09%``
+    2. 叙述句（``modes`` 含 ``narrative``）：``Ma Huateng beneficially owns approximately 8.63% ...``
 
     Args:
         text: 英文披露文本。
         source_page: 源页码标记。
+        modes: 启用的抽取模式。
 
     Returns:
         list[DisclosedHolder]: 抽取结果。
     """
     out: list[DisclosedHolder] = []
     prepared = _soft_unwrap(text)
-    for regex in (_EN_TABLE_ROW_RE, _EN_NARRATIVE_RE):
+    patterns: list[re.Pattern[str]] = []
+    if "table" in modes:
+        patterns.append(_EN_TABLE_ROW_RE)
+    if "narrative" in modes:
+        patterns.append(_EN_NARRATIVE_RE)
+    for regex in patterns:
         for match in regex.finditer(prepared):
             raw_name = match.group(1).strip(" ,.;:-")
             raw_name = _EN_CAPACITY_RE.sub("", raw_name).strip(" ,.;:-")
@@ -273,6 +305,35 @@ def extract_en_holders(text: str, source_page: str = "") -> list[DisclosedHolder
                 )
             )
     return _dedupe_holders(out)
+
+
+def holders_from_html_file(html_path: str | Path, source: str = "HTML表格") -> list[DisclosedHolder]:
+    """从 HTML 披露原文的 <table> 中抽取股东持股（SEC 20-F / 6-K）。
+
+    这是美股侧的主通道：20-F 本身就是 HTML，直接解析表格结构比在文本流上做
+    正则匹配准确得多（列序、空列、capacity 列都不再是问题）。
+
+    Args:
+        html_path: 本地 HTML 文件路径。
+        source: 来源标记（写入 source_page 便于溯源）。
+
+    Returns:
+        list[DisclosedHolder]: 持股记录；文件不存在或解析失败返回空列表。
+    """
+    path = Path(html_path)
+    if not path.exists():
+        return []
+    try:
+        from redchip.overseas.htmltable import extract_holders_from_html
+
+        raw = path.read_bytes().decode("utf-8", errors="ignore")
+        pairs = extract_holders_from_html(raw)
+    except Exception:  # noqa: BLE001 - 表格解析失败不应影响主流程
+        return []
+    return [
+        DisclosedHolder(name=name, share_pct=pct, share_raw=f"{pct:g}%", source_page=source)
+        for name, pct in pairs
+    ]
 
 
 def _dedupe_holders(holders: list[DisclosedHolder]) -> list[DisclosedHolder]:

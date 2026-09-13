@@ -25,6 +25,7 @@ from redchip.verify.shareholders import (
     SHAREHOLDER_KEYWORDS,
     DisclosedHolder,
     extract_holders,
+    extract_narrative_holders,
     is_complete_sum,
     sum_check,
 )
@@ -95,6 +96,7 @@ def crosscheck(
     graph: Graph,
     fts_hits: list[dict],
     cfg: config_mod.Settings | None = None,
+    extra_holders: list[DisclosedHolder] | None = None,
 ) -> CrosscheckResult:
     """执行交叉核对并就地更新报告的置信度与复核原因。
 
@@ -103,6 +105,7 @@ def crosscheck(
         graph: 图谱。
         fts_hits: FTS 命中（含股东章节段落）。
         cfg: 全局配置。
+        extra_holders: 从 HTML 表格结构化解析得到的持股记录（美股主通道）。
 
     Returns:
         CrosscheckResult: 核对结果。
@@ -128,9 +131,16 @@ def crosscheck(
 
     # ---------- 2. 披露口径提取 ----------
     hits = [fts_mod.FtsHit.model_validate(h) for h in fts_hits]
-    result.disclosed = [
-        h for h in _extract_from_hits_by_keywords(hits) if h.share_pct > 0
-    ]
+    # 双通道：HTML 表格（美股 20-F 主通道）+ 文本（港股年报 PDF / 叙述式表述）
+    html_holders = [h for h in (extra_holders or []) if h.share_pct > 0]
+    if html_holders:
+        # HTML 表格已给出结构化结果，文本通道退化为仅抽取叙述式表述，避免数字列被当股东名
+        text_holders = [
+            h for h in _extract_from_hits_by_keywords(hits, narrative_only=True) if h.share_pct > 0
+        ]
+    else:
+        text_holders = [h for h in _extract_from_hits_by_keywords(hits) if h.share_pct > 0]
+    result.disclosed = _dedupe_disclosed(html_holders + text_holders)
     if result.disclosed:
         registry_index = {
             _normalize_name(n): (pct, company)
@@ -190,6 +200,24 @@ def crosscheck(
     return result
 
 
+def _dedupe_disclosed(holders: list[DisclosedHolder]) -> list[DisclosedHolder]:
+    """按「名称 + 比例」去重，优先保留带溯源标记的记录。
+
+    Args:
+        holders: 原始记录。
+
+    Returns:
+        list[DisclosedHolder]: 去重后的记录。
+    """
+    best: dict[tuple[str, float], DisclosedHolder] = {}
+    for h in holders:
+        key = (h.name.lower(), h.share_pct)
+        current = best.get(key)
+        if current is None or (not current.source_page and h.source_page):
+            best[key] = h
+    return list(best.values())
+
+
 def conf_threshold() -> float:
     """复核阈值，与 confidence 模块保持一致。
 
@@ -201,24 +229,25 @@ def conf_threshold() -> float:
     return conf_mod.REVIEW_THRESHOLD
 
 
-def _extract_from_hits_by_keywords(hits: list[fts_mod.FtsHit]) -> list[DisclosedHolder]:
+def _extract_from_hits_by_keywords(
+    hits: list[fts_mod.FtsHit], narrative_only: bool = False
+) -> list[DisclosedHolder]:
     """优先从股东关键词命中的段落提取；无命中时从全部段落兜底提取。
 
     Args:
         hits: FTS 命中。
+        narrative_only: 仅抽取叙述式表述（HTML 表格通道已提供结构化结果时使用）。
 
     Returns:
         list[DisclosedHolder]: 提取结果。
     """
-    shareholder_hits = [
-        h for h in hits if any(kw.lower() in h.snippet.lower() for kw in SHAREHOLDER_KEYWORDS)
-    ]
     # 优先从股东关键词命中的段落提取，并保留页码溯源（source_page）
     shareholder_hits = [
         h for h in hits if any(kw.lower() in h.snippet.lower() for kw in SHAREHOLDER_KEYWORDS)
     ]
     source = shareholder_hits or hits
+    extractor = extract_narrative_holders if narrative_only else extract_holders
     out: list[DisclosedHolder] = []
     for hit in source:
-        out.extend(extract_holders(hit.snippet, source_page=str(hit.page_no)))
+        out.extend(extractor(hit.snippet, source_page=str(hit.page_no)))
     return out

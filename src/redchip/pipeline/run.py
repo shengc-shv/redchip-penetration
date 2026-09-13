@@ -1447,8 +1447,14 @@ def stage_crosscheck(state: PipelineState, cfg: config_mod.Settings) -> Pipeline
         fts_payload = []
 
     from redchip.verify import crosscheck as cc_mod
+    from redchip.verify.shareholders import holders_from_html_file
 
-    cc = cc_mod.crosscheck(report, graph, fts_payload, cfg)
+    # 美股：20-F 是 HTML，直接从 <table> 结构化抽取 Item 7 股东表（比文本正则可靠）
+    extra_holders = []
+    if state.market == Market.US and state.pdf_path:
+        extra_holders = holders_from_html_file(state.pdf_path, source="Item 7 表格")
+
+    cc = cc_mod.crosscheck(report, graph, fts_payload, cfg, extra_holders=extra_holders)
 
     result_path(state.code, cfg).write_text(
         json.dumps(report.model_dump(mode="json"), ensure_ascii=False, indent=2), encoding="utf-8"

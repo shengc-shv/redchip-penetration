@@ -122,9 +122,13 @@ output/llm_raw/                # LLM 原始返回（审计与 Prompt 迭代用�
 
 抽取器支持中英双通道：
 - 中文：「马化腾先生（54.29%）」类表述，过滤合计/總計等汇总行；
-- 英文：港股英文年报与美股 20-F 的股东表，自动剔除 `Long position` / `Corporate (Note 1)` 等
+- 英文（PDF 文本）：港股英文年报股东表，自动剔除 `Long position` / `Corporate (Note 1)` 等
   capacity 列，并合并 PDF 软换行（名称常被拆到多行）。
-  实测腾讯年报 p.79 抽出 MIH Internet Holdings B.V 22.80%、Advance Data Services Limited 8.82%。
+  实测腾讯年报 p.79 抽出 MIH Internet Holdings B.V 22.80%、Advance Data Services Limited 8.82%；
+- **HTML 表格通道**（`overseas/htmltable.py`）：美股 20-F 本身是 HTML，直接解析 `<table>`
+  行列比文本正则可靠得多（列序、空列、capacity 列都不再是问题），栈式解析兼容表格嵌套。
+  实测阿里 20-F Item 7 抽出 5 位董事及高管的持股记录。
+  边界：港股年报是 PDF，不适用此通道；20-F 若无非 5% 以上外部股东，Item 7 仅列董事高管。
 
 error 级问题会拉低置信度的「多源一致性」维度并写入需人工复核原因。
 注：港交所 DI 系统直连不可用（旧接口 302 弃用、新页面对部分网络不可用），
@@ -156,5 +160,5 @@ error 级问题会拉低置信度的「多源一致性」维度并写入需人�
 - [x] 美股：SEC EDGAR 官方 API 抓取 20-F（ticker → CIK → 申报列表 → 原文 → 分块 → FTS），
       复用全部下游阶段；已用 BABA 真实数据验证
 - [x] 英文股东表解析器（港股英文年报 + 美股 20-F 共用）
-- [ ] 20-F Item 7 多列股东表的完整覆盖（当前覆盖叙述式表述与标准三列表）
+- [x] 20-F Item 7 股东表：HTML `<table>` 结构化解析（栈式，兼容嵌套）
 - [ ] 中文繁体年报支持：需先换 pdfplumber/PyMuPDF 修复中文 PDF 提取，再加简繁归一化
