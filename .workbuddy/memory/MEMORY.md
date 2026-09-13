@@ -40,6 +40,18 @@ UBO 识别与解读。GitHub Actions 运行，无需服务器。
 - 美股 HTML 表格解析（Item 7）：`overseas/htmltable.py`
 - 红筹判定口径：注册地+上市地均在境外即为红筹；按控制人分国资/民营，按控制方式分股权/协议（VIE）。
 
+## 境内工商数据源（适配器架构）
+- 实现位于 `src/redchip/domestic/sources/`：`base.py`（协议 + 共享工具）/ `cnbizapi.py` /
+  `qcc.py`（企查查，**接口路径未联调**）/ `fixtures.py`（离线兜底）
+- `domestic/cnbiz.py` 已收敛为**兼容门面**：`CnbizClient` 类名与三个方法签名不变，
+  穿透层与流水线零改动；新增数据源只需实现 `CompanyDataSource` 并在 `build_source()` 登记
+- **标识统一**：穿透层用统一社会信用代码，而真实接口按企业名称检索 →
+  `IdentifierIndex` 维护双向映射（由搜索/基本信息接口回填，零额外请求）
+- 环境变量：`REGISTRY_SOURCE`（auto/cnbizapi/qcc/fixture）、`QCC_APP_KEY`、`QCC_SECRET_KEY`、
+  `REDCHIP_ALLOW_EXPIRED_CERT`（默认 false；开启时仅对该数据源放宽并记警告）
+- 报告顶部已加「行外公开信息初筛，须经行内渠道复核」声明条 + 打印/存 PDF
+  （行内网络可能访问不了 github.io）
+
 ## 已知不可用的外部依赖（勿再尝试）
 - `ah-disclosure-kit`：PyPI 404。港股走自研 `overseas/hkex.py`。
 - `edgartools`：本环境安装不稳定，改用 SEC 官方 REST API。
