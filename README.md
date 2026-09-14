@@ -41,7 +41,7 @@ UBO 判定与 LLM 解读，输出穿透路径图与中文分析报告。运行�
 │   ├── graph/                         # store（图）/ ubo（穿透算法）/ render（渲染）
 │   ├── llm/                           # client（OpenAI 兼容）+ prompts/
 │   └── pipeline/run.py                # 编排：既可整体运行，也可分步执行
-└── tests/                             # 33 个单测（检索 / 穿透 / 过滤 / 渲染 / 端到端）
+└── tests/                             # 124 个单测（检索 / 穿透 / 过滤 / 渲染 / 端到端 / 全量摸底）
 ```
 
 ## 快速开始
@@ -176,6 +176,19 @@ error 级问题会拉低置信度的「多源一致性」维度并写入需人�
   （BABA 配置为浙江省以便验证完整穿透）。
 - **降级策略**：抓取 / LLM / 图库 / PNG 任一环节失败都只记入 `errors` 并标记需人工复核，
   不阻断后续步骤（Actions 中 LLM 步骤设 `continue-on-error: true`）。
+
+## 港交所全量摸底流水线（2026 在审 + 已上市）
+
+面向「先全量、再按广东派生视图」的每日监测底座，纯官方源、零第三方快照依赖。
+
+- **数据源**：港交所披露易官方静态 JSON（`https://www1.hkexnews.hk/ncms/json/eds/{状态}_{板块}_{语言}.json`，免鉴权），覆盖全状态 × 板块。
+- **核心模块**：`src/redchip/overseas/hkex_listing.py`（全量拉取 + 双通道路由 + L2 抽取）、`src/redchip/overseas/hkex_cover.py`（**封面页权威口径**抽取注册地 / 运营实体 / VIE）。
+- **CLI**：`python -m redchip.cli listing --backfill --year 2026` 全量回填；`--daily` 增量 diff；`--l2` 抽结构。
+- **全量脚本**：`scripts/run_full_scan.py` 全量重扫并产出 `data/listing_full.csv` / `data/listing_full_state.json`；`scripts/make_site.py` 生成 `output/site/` 站点（已发布 gh-pages）。
+- **关键口径**：注册地**只认封面页固定句式**（不扫整份 PDF，避免把正文偶发 Cayman 提及当注册地）；广东只作结果一列 + 派生视图，不做预过滤；VIE 只认当前存续安排。
+- **产出**：`output/full_listing_conclusion.md`（结论）、`output/full_listing_overview.md`（总览）、`output/筛选条件_广东红筹.md`（可审计口径）、`output/redchip_gd_evidence_cards.md`（逐家证据卡）。
+
+> 实测 2026 全量 **474 家**（active 379 + listed 95）；注册地覆盖 96.4%（开曼 59 / 境内 396 / 香港 2 / 未判定 17）；离岸 59 → 广东运营线索 **38 家**（核心 25 / 补充 13）。
 
 ## 阶段规划
 
