@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>广东红筹筛选条件</title>
+<meta name="description" content="5 个 AND 条件 + 核心/补充分层 + 阈值敏感性 + 词库审计 + 已知缺口">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="广东红筹筛选条件">
+<meta property="og:description" content="5 个 AND 条件 + 核心/补充分层 + 阈值敏感性 + 词库审计 + 已知缺口">
+<meta property="og:image" content="https://shengc-shv.github.io/redchip-penetration/icon.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:url" content="https://shengc-shv.github.io/redchip-penetration/2026-09-14/criteria.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://shengc-shv.github.io/redchip-penetration/icon.png">
+<meta name="format-detection" content="telephone=no">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 14px 56px; background: #f7f7f8;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, Helvetica, sans-serif;
+  color: #333; -webkit-font-smoothing: antialiased; line-height: 1.65; }
+.wrap { max-width: var(--w, 760px); margin: 0 auto; }
+.card { background: #fff; border: 1px solid #e8e8e8; border-radius: 3px;
+  padding: 18px 20px; margin-bottom: 10px; }
+/* 抬头区：白底 + 顶部细红线，红色只做点睛，不做大面积色块 */
+.head { background: #fff; border: 1px solid #e8e8e8; border-top: 3px solid #a30030;
+  border-radius: 3px; padding: 20px 22px; margin-bottom: 10px; }
+.head h1 { margin: 0; font-size: 21px; font-weight: 600; color: #1a1a1a; letter-spacing: .5px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand img { width: 44px; height: 44px; border-radius: 9px; flex: 0 0 auto; }
+.brand .kicker { font-size: 11.5px; color: #a30030; letter-spacing: 2px; margin-bottom: 3px; }
+.brand .code { font-weight: 400; color: #bbb; font-size: 13.5px; }
+.head .meta { font-size: 12.5px; color: #999; }
+.head .concl { margin-top: 14px; padding: 12px 14px; background: #fafafa;
+  border-left: 3px solid #a30030; border-radius: 2px; font-size: 14px; line-height: 1.75; color: #333; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.stat { background: #fff; border: 1px solid #e8e8e8; border-radius: 3px; padding: 11px 13px; }
+.stat .k { font-size: 11.5px; color: #999; }
+.stat .v { font-size: 18px; font-weight: 700; margin-top: 3px; color: #a30030; }
+.stat .u { font-size: 11px; color: #bbb; font-weight: 400; margin-left: 2px; }
+h2 { font-size: 14.5px; margin: 20px 0 10px; display: flex; align-items: center; gap: 8px;
+  color: #1a1a1a; }
+h2 .bar { width: 3px; height: 14px; border-radius: 1px; background: #a30030; }
+.opp { border-left: 2px solid #e0e0e0; padding: 9px 0 9px 14px; margin-bottom: 12px; }
+.opp.a { border-color: #a30030; } .opp.b { border-color: #b8944d; } .opp.c { border-color: #c4c4c4; }
+.opp .t { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.opp .row { font-size: 12.5px; color: #666; margin-top: 4px; }
+.opp .row b { color: #333; font-weight: 600; }
+.tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 2px;
+  font-weight: 600; margin-right: 6px; vertical-align: 1px; }
+.tag.a { background: #fbeff2; color: #92022c; }
+.tag.b { background: #faf5ec; color: #8a6c2f; }
+.tag.c { background: #f2f2f3; color: #666; }
+.tag.n { background: #eef4ef; color: #2f6b38; }
+.tag.w { background: #fbeff2; color: #92022c; }
+table { width: 100%; border-collapse: collapse; font-size: 12.6px; }
+th { text-align: left; font-weight: 600; color: #666; background: #fafafa;
+  padding: 8px 10px; border-bottom: 2px solid #a30030; font-size: 12px; }
+td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; line-height: 1.6; }
+td.k { color: #999; width: 128px; }
+.muted { color: #666; font-size: 12px; line-height: 1.7; }
+.foot { text-align: center; color: #b0b0b0; font-size: 11.5px; margin-top: 20px; line-height: 1.8; }
+.lv { display:inline-block; padding:2px 8px; border-radius:2px; font-size:11.5px;
+  font-weight:600; margin-left:6px; }
+.lv-L1 { background:#eef7f0; color:#2f6b38; }
+.lv-L2 { background:#eef2fa; color:#2b4b8f; }
+.lv-L3 { background:#fdf6e9; color:#8a6c2f; }
+.lv-L4 { background:#f2f2f3; color:#666; }
+.pill { display:inline-block; padding:1px 6px; border-radius:2px; font-size:11px;
+  background:#f7f7f8; color:#666; margin-right:5px; }
+@media (max-width: 640px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  body { padding: 16px 10px 40px; }
+  table { font-size: 12px; }
+}
+/* 定位声明条：行外初筛结果的必要提示，必须显眼但不能喧宾夺主 */
+.notice { background: #fdf7f8; border: 1px solid #f0dde2; border-left: 3px solid #a30030;
+  border-radius: 3px; padding: 9px 12px; font-size: 12px; color: #7a4a55;
+  line-height: 1.7; margin-bottom: 10px; }
+.notice b { color: #92022c; }
+.printbtn { position: fixed; right: 18px; bottom: 18px; padding: 8px 14px; font-size: 13px;
+  background: #fff; border: 1px solid #d8d8d8; border-radius: 3px; color: #a30030;
+  cursor: pointer; font-family: inherit; }
+.printbtn:hover { border-color: #a30030; }
+/* 行内网络若访问不了外部站点，可用浏览器直接打印或存为 PDF 传阅 */
+@media print {
+  body { background: #fff; padding: 0; }
+  .wrap { max-width: none; }
+  .printbtn, .thumb { display: none !important; }
+  .card, .head, .opp, table { break-inside: avoid; }
+  .notice { background: #fff; }
+  .foot { color: #888; }
+  @page { margin: 12mm; }
+}
+</style></head>
+<body><div style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><img src="https://shengc-shv.github.io/redchip-penetration/icon.png" alt="" width="512" height="512"></div><div class="wrap" style="--w:980px">
+  <div class="notice"><b>行外公开信息初筛</b> · 本页数据取自公开披露文件与商业工商数据源，仅用于线索发现；涉及客户准入、授信与合规的判断，须以行内渠道数据复核为准。</div>
+
+  <div class="head">
+    <div class="brand">
+      <img src="icon.png" alt="" width="44" height="44">
+      <div>
+        <div class="kicker">口径文档</div>
+        <h1>广东红筹筛选条件 <span class="code"></span></h1>
+      </div>
+    </div>
+    <div class="meta" style="margin-top:10px"><a href="../index.html">← 返回站点首页</a></div>
+    
+  </div>
+
+  <div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">用途：说明 <code>data/listing_full.csv</code> 中「广东红筹」这一类是怎么筛出来的，含<b>条件、分层、阈值敏感性、词库审计</b>与已知缺口。<br>v2 变更（2026-09-13）：修正「历史沿革」分册名变体漏扫 → 词频口径统一 → <b>引入核心/补充分层</b>。<br>⚠️ 全表为<b>行外公开信息初筛</b>，须经行内渠道复核。</div>
+<hr style="border:0;border-top:1px solid #eee;margin:16px 0">
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>一、定义</h2>
+  <p style='margin:8px 0'><b>在广东经营的红筹架构企业 = 上市主体在境外离岸地注册（红筹形态） + 其境内运营实体落在广东省。</b></p>
+<p style='margin:8px 0'>两个要件分别回答「<b>壳在哪</b>」与「<b>经营在哪</b>」——开曼是法律壳，广东才是可开户 / 可授信、且归属分行可覆盖的实体。</p>
+<hr style="border:0;border-top:1px solid #eee;margin:16px 0">
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>二、筛选条件（五个 AND 条件，全部在代码中可追溯）</h2>
+  <table><thead><tr><th>#</th><th>条件</th><th>判定字段</th><th>取值</th><th>实现位置</th></tr></thead><tbody><tr><td>1</td><td><b>时间</b>：2026 年以来递表</td><td><code>submit_date</code></td><td>≥ 2026-01-01（取官方 <code>d</code> 字段，<b>非抓取日</b>）</td><td><code>run_full_scan.py --min-year 2026</code></td></tr><tr><td>2</td><td><b>状态</b>：只保留可产生商机的进展</td><td><code>status_raw</code></td><td>∈ {<code>active</code>, <code>listed</code>}；<b>剔除</b> 失效·撤回·被拒绝·被发回</td><td><code>run_full_scan.py --status active,listed</code></td></tr><tr><td>3</td><td><b>离岸注册</b>：红筹形态的必要条件</td><td><code>domicile</code> / <code>is_offshore</code></td><td>开曼群岛 或 百慕大（<b>封面页权威口径</b>）</td><td><code>hkex_cover.scan_cover</code></td></tr><tr><td>4</td><td><b>广东运营实体</b>：地域线索</td><td><code>gd_opco_count</code></td><td>≥ <b>3</b>（广东城市词命中次数）</td><td><code>hkex_cover.scan_operating_region</code></td></tr><tr><td>5</td><td><b>线索权威性分层</b></td><td><code>gd_opco_source</code></td><td>命中于 <code>SUMMARY</code> / <code>CORPORATE INFORMATION</code> → <b>核心层</b>；仅 <code>HISTORY</code> → <b>补充层</b></td><td>见下节</td></tr></tbody></table>
+<p style='margin:8px 0'><b>⚠️ 明确不作为条件的</b>：企业<b>名称</b>是否含广东地名（<code>gd_flag</code>）。名称预筛会漏掉全部「开曼壳名 + 广东运营实体」的正典红筹——实测 59 家离岸申请人中<b>没有一家</b>名称含粤字。<code>gd_flag</code> 仅作结果表一列。</p>
+<hr style="border:0;border-top:1px solid #eee;margin:16px 0">
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>三、线索权威性分层（v2 新增，关键）</h2>
+  <table><thead><tr><th>层</th><th>命中分册</th><th>语义</th><th>噪音来源</th><th>家数（阈值 3）</th></tr></thead><tbody><tr><td><b>核心</b></td><td><code>SUMMARY</code>（概要）/ <code>CORPORATE INFORMATION</code>（公司资料）</td><td>公司<b>自述</b>总部 / 运营实体 / 主要银行，最贴近「运营地」</td><td>低</td><td><b>20</b></td></tr><tr><td><b>补充</b></td><td>仅 <code>HISTORY</code>（历史沿革）</td><td>重组沿革叙述</td><td><b>高</b>：该章含股东、投资方、中介机构地址</td><td>7</td></tr><tr><td>—</td><td>未命中</td><td>—</td><td>—</td><td>32（离岸合计 59）</td></tr></tbody></table>
+<p style='margin:8px 0'><b>为什么分层</b>：「历史沿革」章会大量出现投资方 / 中介的注册地址（如某深圳基金、某深圳律所），城市名与「运营地」无关。实测若把该章与自述章等权计数，会出现仅靠股东地址入榜的案例。</p>
+<p style='margin:8px 0'><b>广东并集（核心口径）</b> = 离岸核心 20 + 境内名称 86 = <b>106 家</b>。</p>
+<hr style="border:0;border-top:1px solid #eee;margin:16px 0">
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>四、核心层清单（20 家，按线索强度降序）</h2>
+  <table><thead><tr><th>词频</th><th>企业</th><th>递表日</th><th>状态</th><th>命中分册</th><th>词频构成</th></tr></thead><tbody><tr><td>134</td><td>聖火科技集團有限公司</td><td>2026-03-13</td><td>处理中</td><td>公司资料</td><td>guangdong×113, guangzhou×21</td></tr><tr><td>117</td><td>Yueyuan Group Holdings Company Limited</td><td>2026-07-09</td><td>处理中</td><td>概要</td><td>shenzhen×95, zhuhai×13, guangdong×8, huizhou×1</td></tr><tr><td>103</td><td>錢大媽國際控股有限公司</td><td>2026-08-21</td><td>处理中</td><td>公司资料</td><td>guangzhou×72, shenzhen×19, guangdong×7, zhuhai×5</td></tr><tr><td>80</td><td>麓鵬製藥有限公司 - B</td><td>2026-05-28</td><td>处理中</td><td>公司资料</td><td>guangzhou×63, shenzhen×12, guangdong×5</td></tr><tr><td>59</td><td>Casstime Holdings Ltd.</td><td>2026-04-16</td><td>处理中</td><td>公司资料</td><td>shenzhen×56, guangzhou×3</td></tr><tr><td>46</td><td>TOP TOY International Group Limited</td><td>2026-03-31</td><td>处理中</td><td>公司资料</td><td>guangzhou×23, guangdong×10, dongguan×5, shenzhen×8</td></tr><tr><td>41</td><td>Immvira Bioscience Inc. - B</td><td>2026-07-16</td><td>处理中</td><td>公司资料</td><td>shenzhen×41</td></tr><tr><td>39</td><td>Radvance Cayman Limited</td><td>2026-03-13</td><td>处理中</td><td>公司资料</td><td>shenzhen×37, guangdong×1, guangzhou×1</td></tr><tr><td>39</td><td>Aqara International Ltd</td><td>2026-04-12</td><td>处理中</td><td>公司资料</td><td>shenzhen×39</td></tr><tr><td>33</td><td>隨手播集團公司</td><td>2026-03-27</td><td>处理中</td><td>概要</td><td>guangzhou×16, guangdong×9, zhuhai×6, huizhou×2</td></tr><tr><td>30</td><td>Xiaoe Inc.</td><td>2026-05-19</td><td>处理中</td><td>公司资料</td><td>shenzhen×27, guangdong×2, guangzhou×1</td></tr><tr><td>29</td><td>XREAL Ltd.</td><td>2026-04-01</td><td>处理中</td><td>公司资料</td><td>shenzhen×29</td></tr><tr><td>26</td><td>FJD Inc.</td><td>2026-06-05</td><td>处理中</td><td>公司资料</td><td>shenzhen×12, guangdong×10, foshan×4</td></tr><tr><td>25</td><td>拉拉科技控股有限公司 - W</td><td>2026-04-30</td><td>处理中</td><td>公司资料</td><td>shenzhen×24, guangdong×1</td></tr><tr><td>23</td><td>SmartMore Inc.</td><td>2026-03-16</td><td>处理中</td><td>公司资料</td><td>shenzhen×21, guangdong×2</td></tr><tr><td>17</td><td>Growatt Technology Co., Ltd</td><td>2026-06-29</td><td>处理中</td><td>概要</td><td>shenzhen×5, huizhou×5, qingyuan×4, guangdong×3</td></tr><tr><td>13</td><td>安聯國際控股有限公司</td><td>2026-07-24</td><td>处理中</td><td>概要</td><td>guangzhou×11, guangdong×2</td></tr><tr><td>5</td><td>暖哇洞察科技有限公司</td><td>2026-04-13</td><td>处理中</td><td>概要</td><td>guangzhou×2, shenzhen×2, zhongshan×1</td></tr><tr><td>5</td><td><b>Exegenesis Bio Inc. - B</b>（最近一家，2026-08-28）</td><td>2026-08-28</td><td>处理中</td><td>概要</td><td>guangzhou×5</td></tr><tr><td>3</td><td>中旅港澳文旅控股有限公司</td><td>2026-05-20</td><td>处理中</td><td>概要</td><td>shenzhen×2, zhuhai×1</td></tr></tbody></table>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">另有 <b>2 家</b>在核心层但词频 &lt; 3（环球园艺 2、自然堂 1、兴明亚洲 1 等），未达阈值。</div>
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>五、补充层清单（7 家，仅历史沿革章命中）</h2>
+  <table><thead><tr><th>词频</th><th>企业</th><th>递表日</th><th>词频构成</th></tr></thead><tbody><tr><td>11</td><td>真實生物科技有限公司 - B</td><td>2026-05-29</td><td>shenzhen×10, guangdong×1</td></tr><tr><td>10</td><td>岸邁生物科技有限公司 - B</td><td>2026-07-06</td><td>zhuhai×10</td></tr><tr><td>5</td><td>米連科技有限公司</td><td>2026-04-01</td><td>shenzhen×5</td></tr><tr><td>5</td><td>Eccogene Inc. - B</td><td>2026-04-29</td><td>shenzhen×5</td></tr><tr><td>5</td><td>Megatronix Inc.</td><td>2026-05-29</td><td>shenzhen×5</td></tr><tr><td>4</td><td>微脉公司</td><td>2026-04-20</td><td>zhuhai×4</td></tr><tr><td>4</td><td>長宏新材集團有限公司</td><td>2026-04-30</td><td>shenzhen×2, guangdong×2</td></tr></tbody></table>
+<hr style="border:0;border-top:1px solid #eee;margin:16px 0">
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>六、阈值敏感性（诚实披露：条件 4 的松紧会改变名单）</h2>
+  <table><thead><tr><th>词频阈值</th><th>全章口径（59 家离岸）</th><th><b>核心层</b></th></tr></thead><tbody><tr><td>≥ 1</td><td>35</td><td>23</td></tr><tr><td><b>≥ 3（当前采用）</b></td><td><b>27</b></td><td><b>20</b></td></tr><tr><td>≥ 5</td><td>24</td><td>19</td></tr><tr><td>≥ 10</td><td>19</td><td>17</td></tr><tr><td>≥ 20</td><td>15</td><td>15</td></tr></tbody></table>
+<p style='margin:8px 0'>结论：<b>「20 家」是「核心层 + 阈值 3」下的口径，不是唯一答案</b>；对外建议写「核心层 20 家（放宽到阈值 1 为 23 家）」。</p>
+<hr style="border:0;border-top:1px solid #eee;margin:16px 0">
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>七、广东地名词库审计（2026-09-13）</h2>
+  <p style='margin:8px 0'>词库为<b>单一权威表</b> <code>hkex_listing._GD_CITY_TABLE</code>，CN / EN / 文本扫描三处共用，避免漂移。</p>
+<table><thead><tr><th>维度</th><th>结果</th></tr></thead><tbody><tr><td>广东省 <b>21 个地级市</b> · 拼音（英）</td><td>✅ 21/21 全覆盖</td></tr><tr><td>广东省 <b>21 个地级市</b> · 简体中文</td><td>✅ 21/21 全覆盖</td></tr><tr><td>广东省 <b>21 个地级市</b> · <b>繁体中文</b></td><td>🔧 <b>本次修复</b>：原缺 10 个（廣州 / 汕頭 / 韶關 / 肇慶 / 江門 / 陽江 / 清遠 / 東莞 / 揭陽 / 雲浮）</td></tr><tr><td>省名</td><td>✅ 广东 / 廣東 / guangdong</td></tr><tr><td>附加区级地名</td><td>顺德 / 順德 / shunde（区级，但常直接用于企业名）</td></tr><tr><td>境内属地词库（工商口径）</td><td>✅ <code>domestic.penetration.GUANGDONG_CITIES</code> 21/21 地级市齐全（境内数据为简体，无需繁体）</td></tr></tbody></table>
+<p style='margin:8px 0'><b>为什么繁体缺不得</b>：港交所官方<b>中文名一律用繁体</b>（如「廣州極飛科技股份有限公司」「東莞…」）。原词库只收简体时，凡「<b>繁体粤地名 + 不含地名的英文壳名</b>」的企业都会漏判。本次实测该类记录 24 条，因英文名恰好含拼音而<b>当前漏判为 0</b>——缺口是<b>潜在</b>的，已修并加单测锁死（<code>tests/test_guangdong.py</code>）。</p>
+<p style='margin:8px 0'><b>刻意不收录（判断说明，可按需增补）</b></p>
+<ul style="margin:6px 0;padding-left:20px"><li><b>区级 / 开发区地名</b>：南山、前海、横琴、南沙、天河、宝安、松山湖… —— 与他省同名（南山—烟台/三亚、黄埔—上海、白云—机场）或过泛，会引入假阳性；</li><li><b>历史拼写</b>：Canton（广州旧称）、Swatow（汕头）、Teochew（潮州）、Kongmoon（江门）、Tsamkong（湛江）—— 现代港交所文件一律用拼音，收录反而增加噪音（"Canton" 亦为美国城市名）。</li></ul>
+<hr style="border:0;border-top:1px solid #eee;margin:16px 0">
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>八、边界与已知缺口（勿掩盖）</h2>
+  <ol style="margin:6px 0;padding-left:20px"><li><b>线索 ≠ 结论</b>：词频只提示运营实体可能在粤。已发现词频 5 的 Exegenesis，其广东连接为「<b>广州研发/临床团队</b>」（主基地在杭州），非法人主体。<b>逐家须复核原文</b>（<code>output/redchip_gd_evidence_cards.md</code>）。</li><li><b>取数通道差异</b>：无 Multi-Files 目录的已上市记录改用 listedco 招股章程前 80 页，口径与分册法不同（标为 <code>listedco:prospectus(前80页)</code>）。</li><li><b>未检出 ≠ 非广东</b>：分册未陈述或词频低于阈值者不能据此排除。</li><li><b>口径人口缺口</b>：474 家中 17 家注册地未判定（10 家 listedco 取数超时 + 6 家封面句未命中 + 1 家官方未刊发）。</li><li><b>VIE 不参与本筛选</b>：<code>is_vie</code> 只描述控制方式，与地域正交（见 <code>output/vie_evidence_cards.md</code>）。</li><li><b>未接入境内工商</b>：境内持股比例 / 实控人未核（需行内渠道）。</li></ol>
+<hr style="border:0;border-top:1px solid #eee;margin:16px 0">
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>九、复现命令</h2>
+  <pre><code>export PYTHONPATH=src
+PY=/Users/shengc/.workbuddy/binaries/python/envs/default/bin/python
+$PY scripts/run_full_scan.py --min-year 2026 --status active,listed   # 封面页注册地全量判定
+$PY scripts/scan_offshore_gd.py --min-hits 3 --redo                    # 离岸子集 → 广东运营线索（分层）
+$PY scripts/scan_vie_full.py --workers 5                               # VIE 判定
+$PY scripts/make_full_listing.py                                       # 全量 CSV + 三视图 + 结论
+$PY scripts/make_bd_ledger.py                                          # 新口径 BD 台账
+$PY scripts/make_evidence_cards.py                                     # 广东红筹候选原文证据卡
+$PY scripts/make_vie_evidence_cards.py                                 # VIE 原文证据卡
+$PY scripts/make_field_dictionary.py                                   # 字段中文说明</code></pre>
+</div>
+
+  <div class="foot">
+    数据来源：港交所披露易公开申请版本（Multi-Files 分册）· 由红筹架构穿透系统自动抽取<br>
+    事实性陈述均标注来源分册，可逐条回溯原文；具体数字需业务部门另行核实
+  </div>
+  <button class="printbtn" onclick="window.print()">打印 / 存为 PDF</button>
+</div>
+
+</body></html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VIE 判定 · 原文证据卡</title>
+<meta name="description" content="是 4 / 否(仅历史安排) 19 / 待核验 11，逐条可溯源">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VIE 判定 · 原文证据卡">
+<meta property="og:description" content="是 4 / 否(仅历史安排) 19 / 待核验 11，逐条可溯源">
+<meta property="og:image" content="https://shengc-shv.github.io/redchip-penetration/icon.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:url" content="https://shengc-shv.github.io/redchip-penetration/2026-09-14/vie_cards.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://shengc-shv.github.io/redchip-penetration/icon.png">
+<meta name="format-detection" content="telephone=no">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 14px 56px; background: #f7f7f8;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, Helvetica, sans-serif;
+  color: #333; -webkit-font-smoothing: antialiased; line-height: 1.65; }
+.wrap { max-width: var(--w, 760px); margin: 0 auto; }
+.card { background: #fff; border: 1px solid #e8e8e8; border-radius: 3px;
+  padding: 18px 20px; margin-bottom: 10px; }
+/* 抬头区：白底 + 顶部细红线，红色只做点睛，不做大面积色块 */
+.head { background: #fff; border: 1px solid #e8e8e8; border-top: 3px solid #a30030;
+  border-radius: 3px; padding: 20px 22px; margin-bottom: 10px; }
+.head h1 { margin: 0; font-size: 21px; font-weight: 600; color: #1a1a1a; letter-spacing: .5px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand img { width: 44px; height: 44px; border-radius: 9px; flex: 0 0 auto; }
+.brand .kicker { font-size: 11.5px; color: #a30030; letter-spacing: 2px; margin-bottom: 3px; }
+.brand .code { font-weight: 400; color: #bbb; font-size: 13.5px; }
+.head .meta { font-size: 12.5px; color: #999; }
+.head .concl { margin-top: 14px; padding: 12px 14px; background: #fafafa;
+  border-left: 3px solid #a30030; border-radius: 2px; font-size: 14px; line-height: 1.75; color: #333; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.stat { background: #fff; border: 1px solid #e8e8e8; border-radius: 3px; padding: 11px 13px; }
+.stat .k { font-size: 11.5px; color: #999; }
+.stat .v { font-size: 18px; font-weight: 700; margin-top: 3px; color: #a30030; }
+.stat .u { font-size: 11px; color: #bbb; font-weight: 400; margin-left: 2px; }
+h2 { font-size: 14.5px; margin: 20px 0 10px; display: flex; align-items: center; gap: 8px;
+  color: #1a1a1a; }
+h2 .bar { width: 3px; height: 14px; border-radius: 1px; background: #a30030; }
+.opp { border-left: 2px solid #e0e0e0; padding: 9px 0 9px 14px; margin-bottom: 12px; }
+.opp.a { border-color: #a30030; } .opp.b { border-color: #b8944d; } .opp.c { border-color: #c4c4c4; }
+.opp .t { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.opp .row { font-size: 12.5px; color: #666; margin-top: 4px; }
+.opp .row b { color: #333; font-weight: 600; }
+.tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 2px;
+  font-weight: 600; margin-right: 6px; vertical-align: 1px; }
+.tag.a { background: #fbeff2; color: #92022c; }
+.tag.b { background: #faf5ec; color: #8a6c2f; }
+.tag.c { background: #f2f2f3; color: #666; }
+.tag.n { background: #eef4ef; color: #2f6b38; }
+.tag.w { background: #fbeff2; color: #92022c; }
+table { width: 100%; border-collapse: collapse; font-size: 12.6px; }
+th { text-align: left; font-weight: 600; color: #666; background: #fafafa;
+  padding: 8px 10px; border-bottom: 2px solid #a30030; font-size: 12px; }
+td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; line-height: 1.6; }
+td.k { color: #999; width: 128px; }
+.muted { color: #666; font-size: 12px; line-height: 1.7; }
+.foot { text-align: center; color: #b0b0b0; font-size: 11.5px; margin-top: 20px; line-height: 1.8; }
+.lv { display:inline-block; padding:2px 8px; border-radius:2px; font-size:11.5px;
+  font-weight:600; margin-left:6px; }
+.lv-L1 { background:#eef7f0; color:#2f6b38; }
+.lv-L2 { background:#eef2fa; color:#2b4b8f; }
+.lv-L3 { background:#fdf6e9; color:#8a6c2f; }
+.lv-L4 { background:#f2f2f3; color:#666; }
+.pill { display:inline-block; padding:1px 6px; border-radius:2px; font-size:11px;
+  background:#f7f7f8; color:#666; margin-right:5px; }
+@media (max-width: 640px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  body { padding: 16px 10px 40px; }
+  table { font-size: 12px; }
+}
+/* 定位声明条：行外初筛结果的必要提示，必须显眼但不能喧宾夺主 */
+.notice { background: #fdf7f8; border: 1px solid #f0dde2; border-left: 3px solid #a30030;
+  border-radius: 3px; padding: 9px 12px; font-size: 12px; color: #7a4a55;
+  line-height: 1.7; margin-bottom: 10px; }
+.notice b { color: #92022c; }
+.printbtn { position: fixed; right: 18px; bottom: 18px; padding: 8px 14px; font-size: 13px;
+  background: #fff; border: 1px solid #d8d8d8; border-radius: 3px; color: #a30030;
+  cursor: pointer; font-family: inherit; }
+.printbtn:hover { border-color: #a30030; }
+/* 行内网络若访问不了外部站点，可用浏览器直接打印或存为 PDF 传阅 */
+@media print {
+  body { background: #fff; padding: 0; }
+  .wrap { max-width: none; }
+  .printbtn, .thumb { display: none !important; }
+  .card, .head, .opp, table { break-inside: avoid; }
+  .notice { background: #fff; }
+  .foot { color: #888; }
+  @page { margin: 12mm; }
+}
+</style></head>
+<body><div style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><img src="https://shengc-shv.github.io/redchip-penetration/icon.png" alt="" width="512" height="512"></div><div class="wrap" style="--w:980px">
+  <div class="notice"><b>行外公开信息初筛</b> · 本页数据取自公开披露文件与商业工商数据源，仅用于线索发现；涉及客户准入、授信与合规的判断，须以行内渠道数据复核为准。</div>
+
+  <div class="head">
+    <div class="brand">
+      <img src="icon.png" alt="" width="44" height="44">
+      <div>
+        <div class="kicker">证据卡</div>
+        <h1>VIE 判定 · 原文证据卡 <span class="code"></span></h1>
+      </div>
+    </div>
+    <div class="meta" style="margin-top:10px"><a href="../index.html">← 返回站点首页</a></div>
+    
+  </div>
+
+  <div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555"><b>用途</b>：逐条复核 <code>is_vie</code> 结论——每条给出<b>原文证据片段</b>、<b>依据分册</b>与<b>招股书入口</b>，可直接点回原文核对。<br><b>判据</b>：强信号 = <code>variable interest entity</code> / <b>大写</b> <code>VIE</code>/<code>VIEs</code> / <code>协议控制</code>（大小写敏感，避免命中英文动词 vie 与断词残留）；弱信号 = <code>contractual arrangements</code> 与 <code>WFOE</code>/<code>VIE</code>/<code>nominee</code>/<code>consolidat</code> 同现。<br><b>分册权威性</b>：港交所招股书若上市主体<b>当前</b>存在 VIE，必在「概要」与「风险因素」章披露；只在「历史沿革」章出现的多属<b>已终止的历史安排</b>，记为「否（仅历史安排）」。<br>生成时间：2026-09-13 20:53（北京时间）。</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>一、复核方法</h2>
+  <ol style="margin:6px 0;padding-left:20px"><li>点开「招股书入口」，进入披露易 Multi-Files 页面；</li><li>打开 <code>SUMMARY</code>（概要）与 <code>RISK FACTORS</code>（风险因素）分册，搜索关键词 <code>VIE</code>、<code>Contractual Arrangements</code>；</li><li>若两章均有 VIE 结构描述 → 结论「是」成立；若仅 <code>HISTORY</code> 章出现且含 _terminated / Historical_ 字样 → 「仅历史安排」成立；</li><li>证据片段为 pypdf 抽取文本，偶有断词（如 <code>vie w</code>、<code>Vie tnam</code>），请以 PDF 为准。</li></ol>
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>二、判定汇总</h2>
+  <table><thead><tr><th>结论</th><th>家数</th></tr></thead><tbody><tr><td>是（当前存在 VIE）</td><td>4</td></tr><tr><td>否（仅历史安排，已终止）</td><td>19</td></tr><tr><td>否（未检出 VIE 表述）</td><td>440</td></tr><tr><td>待核验（未取得可判文本）</td><td>11</td></tr></tbody></table>
+<hr style="border:0;border-top:1px solid #eee;margin:16px 0">
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>三、判定为「是」的 4 家</h2>
+  <h3 style='font-size:13.5px;margin:14px 0 6px'>1. Manycore Tech Inc.</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：<b>是</b>｜<b>依据分册</b>：listedco:prospectus(前80页)</li><li><b>注册地(封面)</b>：开曼群岛｜<b>状态</b>：已上市｜<b>代码</b>：00068｜<b>递表日</b>：2026-03-29</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">ould materially and adversely affect our business, results of operations, financial condition, and prospects. CONTRACTUAL ARRANGEMENTS The operation of our certain businesses during the Track Record Period are subject to various foreign ownership restrictions</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：—</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>2. 拉拉科技控股有限公司 - W</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：<b>是</b>｜<b>依据分册</b>：SUMMARY</li><li><b>注册地(封面)</b>：开曼群岛｜<b>状态</b>：处理中｜<b>代码</b>：—｜<b>递表日</b>：2026-04-30</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">INFORMATION MUST BE READ IN CONJUNCTION WITH THE SECTION HEADED "W ARNING" ON THE COVER OF THIS DOCUMENT. OUR CONTRACTUAL ARRANGEMENTS Due to foreign investment restrictions under the relevant PRC and Indonesian laws and regulations, our Company is unable to o</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108488/documents/sehk26043002914.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>3. 普祥健康控股有限公司</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：<b>是</b>｜<b>依据分册</b>：SUMMARY</li><li><b>注册地(封面)</b>：开曼群岛｜<b>状态</b>：处理中｜<b>代码</b>：—｜<b>递表日</b>：2026-05-22</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">up, through Puxiang Investment, has maintained effective maximum control as commercially practicable over our VIE Hospitals. See "Contractual Arrangements" for details. SUMMARY –9– THIS DOCUMENT IS IN DRAFT FORM, INCOMPLETE AND SUBJECT TO CHANGE AND THAT THE I</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108563/documents/sehk26052201903.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>4. 馭勢科技(北京)股份有限公司</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：<b>是</b>｜<b>依据分册</b>：listedco:prospectus(前80页)</li><li><b>注册地(封面)</b>：中国(境内)｜<b>状态</b>：已上市｜<b>代码</b>：01511｜<b>递表日</b>：2026-04-19</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">V AT" value-added tax; all amounts are exclusive of V AT in this prospectus except where indicated otherwise "VIE" variable interest entity "Voting Proxies Arrangement" the arrangement under the agreements dated September 9, 2020, November 5, 2020 and December</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：—</li></ul>
+<hr style="border:0;border-top:1px solid #eee;margin:16px 0">
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>四、判定为「否（仅历史安排）」的 19 家</h2>
+  <div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">这些企业<b>曾</b>搭建 VIE（或相关协议控制安排），招股书披露为已终止/历史安排，<b>当前结构不计为 VIE</b>。</div>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>1. Aqara International Ltd</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：HISTORY, DEVELOPMENT AND C(仅历史沿革章·疑已终止)</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">nzhen Lumi Historically and up to March 2022, Shenzhen Lumi was consolidated to our Group pursuant to certain contractual arrangements entered into among Eigenstone, Shenzhen Lumi, and the then registered shareholder of Shenzhen Lumi (the " Shenzhen Lumi Contr</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108366/documents/sehk26032900568.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>2. Casstime Holdings Ltd.</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：HISTORY AND DEVELOPMENT(仅历史沿革章·疑已终止)</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">subsidiaries and to comply with the relevant laws and regulations, a series of agreements in connection with variable interest entity (VIE) contractual arrangements (the " Contractual Arrangements ") were entered into by Casstime Shenzhen, Shenzhen Casstime a</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108408/documents/sehk26040203409.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>3. Exegenesis Bio Inc. - B</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：—</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">n — D. Pre-[REDACTED] Equity Incentive Plan" in Appendix IV to this document. Reorganization and Unwinding of Historical Contractual Arrangements We historically conducted the R&amp;D of human cell and gene diagnostic and therapeutic technologies (the "CGT Busines</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108832/documents/sehk26082804043.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>4. Extransfer Limited - W</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：—</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">THE INFORMATION MUST BE READ IN CONJUNCTION WITH THE SECTION HEADED "W ARNING" ON THE COVER OF THIS DOCUMENT. HISTORICAL CONTRACTUAL ARRANGEMENTS Historically, we conducted certain of our businesses in the PRC through contractual arrangements among Shanghai Du</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108462/documents/sehk26042402872.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>5. Frontera Therapeutics - B</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：—</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">REDACTED] Equity Incentive Plan" in Appendix IV to this document. 6. Reorganization and the Unwinding of the Historical Contractual Arrangements Commencing in September 2020 and up to December 2025, we conducted the business of gene therapy R&amp;D, which was a b</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108828/documents/sehk26082803705.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>6. Growatt Technology Co., Ltd</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：—</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">Reorganization. Please see the paragraph headed "—Reorganization" in this section for further details of the historical contractual arrangements of our Group. HISTORY, REORGANIZATION AND CORPORATE STRUCTURE –9 4– THIS DOCUMENT IS IN DRAFT FORM, INCOMPLETE AND</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108649/documents/sehk26061601771.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>7. Xiaoe Inc.</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：HISTORY AND CORPORATE STRU(仅历史沿革章·疑已终止)</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">ished our Company in the Cayman Islands to facilitate business expansion. That same year, through a series of contractual arrangements, the financial statements of Xiaoe Network, Shenzhen Xiaoetong Technology and Beijing Xiaoe Online, our PRC operating entitie</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108549/documents/sehk26051901284.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>8. Yangtuo Holdings Inc.</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：HISTORY, REORGANIZATION AN(仅历史沿革章·疑已终止)</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">tunities and our plan to seek for listing opportunities in overseas mark ets, we entered into (i) a series of contractual arrangements with Hangzhou Yangtuo Internet a nd its then shareholders in July 2015, November 2019, September 2021 and November 2022; and</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108693/documents/sehk26062902402.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>9. Yusheng Holdings Limited</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：HISTORY, REORGANIZATION AN(仅历史沿革章·疑已终止)</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">prohibitions (the " Restricted Businesses "). On June 26, 2018, Haoche Kuku Tianjin entered into a series of contractual arrangements with Taoche Technology and the nominee shareholders of Taoche Technology (the " 2018 Contractual Arrangements "). Through the</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108511/documents/sehk26050600118.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>10. 北京星辰天合科技股份有限公司</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：HISTORY, DEVELOPMENT AND C(仅历史沿革章·疑已终止)</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">oreign investors and facilitating potential overseas listing application, in December 2015, we also adopted a VIE structure (the " 2015 Contractual Arrangements "), pursuant to which we were able to, through XSKY COOPERA TION (through its wholly-owned subsidia</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108849/documents/sehk26083000408.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>11. 南京硅基智能科技集團股份有限公司</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：HISTORY, DEVELOPMENT AND C(仅历史沿革章·疑已终止)</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">y. Then in December 2018, we terminated the shareholding entrustment arrangement and entered into a series of contractual arrangements with Nanjing Wanruyi and its registered shareholders (the " Contractual Arrangements "), through which Nanjing Wanruyi was co</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108560/documents/sehk26052101521.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>12. 四維智聯(南京)科技股份有限公司</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：HISTORY, REORGANIZATION AN(仅历史沿革章·疑已终止)</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">rated in the BVI with limited liability and is principally engaged in equity investment. Didi Technology is a variable interest entity of DiDi Global Inc., whilst Top Grove Limited is a wholly-owned subsidiary of Didi Global Inc. DiDi Global Inc. is a leading</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108334/documents/sehk26032602243.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>13. 太合音樂集團</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：HISTORY, REORGANIZATION AN(仅历史沿革章·疑已终止)</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">Co., Ltd. (ʮ̡ )( " Beijing Maitian Future Music ") in September 2021. Adoption of Beijing Taihe Music Culture Contractual Arrangements To streamline our corporate and shareholding structure, on December 1, 2021, the shareholders of Beijing Taihe Music Culture</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108669/documents/sehk26062201788.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>14. 孩子王儿童用品股份有限公司</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：HISTORY, DEVELOPMENT AND C(仅历史沿革章·疑已终止)</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">into a series of contractual arrang ements with Jiangsu Kidswant and its then registered shareholders (the " Contractual Arrangements "), under which Jiangsu Kidswant operated the online sales platforms and collect ed customer payments on our behalf. Pursuant</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108672/documents/sehk26062301872.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>15. 廣州極飛科技股份有限公司</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：HISTORY, DEVELOPMENT AND C(仅历史沿革章·疑已终止)</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">for our potential financing activities during the early stage of our development, we entered into a series of variable interest entity arrangements (the " VIE Arrangements ") in 2014. At the relevant time, it was not uncommon for Chinese tech entities to adopt</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108336/documents/sehk26032603177.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>16. 微脉公司</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：HISTORY, REORGANIZATION AN(仅历史沿革章·疑已终止)</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">f the proposed [REDACTED] , we underwent the following steps of internal restructuring: Establishment of 2024 VIE Structure During the Series D+ Financing, to consolidate the existing contractual arrangements with Weimai Technology and Hangzhou Lihe, on Decemb</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108452/documents/sehk26042001783.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>17. 暖哇洞察科技有限公司</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：HISTORY, DEVELOPMENT AND C(仅历史沿革章·疑已终止)</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">s then shareholders, namely Shanghai Longhao and ZhangAn Information Technology in accordance with the Former Contractual Arrangements. See "— Former Contractual Arrangements" below for details. Series Angel Financing On July 30, 2019, our Company, Nova Intern</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108441/documents/sehk26041301037.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>18. 米連科技有限公司</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：HISTORY, REORGANIZATION AN(仅历史沿革章·疑已终止)</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">VER OF THIS DOCUMENT. Due to foreign investment restrictions and prohibitions in the PRC, we entered into the Contractual Arrangements, pursuant to which Beijing Linke has acquired effective control over our Consolidated Affiliated Entities. Accordingly, our C</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108391/documents/sehk26040103901.pdf</li></ul>
+<h3 style='font-size:13.5px;margin:14px 0 6px'>19. 賽諾醫療科學技術股份有限公司</h3>
+<ul style="margin:6px 0;padding-left:20px"><li><b>结论</b>：否（仅历史安排）｜<b>依据分册</b>：—</li><li><b>原文证据</b>：</li></ul>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">s offshore holding platform and consolidated its business under the Company, including (i) termination of the Contractual Arrangements between Fuji Yangguang, its share holders, Sinomed Holding and Be ijing Sinomed; (ii) transfer of the THIS DOCUMENT IS IN DRA</div>
+<ul style="margin:6px 0;padding-left:20px"><li>招股书入口：https://www1.hkexnews.hk/app/sehk/2026/108580/documents/sehk26052701981.pdf</li></ul>
+<hr style="border:0;border-top:1px solid #eee;margin:16px 0">
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>五、待核验 11 家（未取得可判文本）</h2>
+  <table><thead><tr><th>#</th><th>企业</th><th>代码</th><th>状态</th><th>原因</th></tr></thead><tbody><tr><td>1</td><td>南京埃斯頓自動化股份有限公司</td><td>02715</td><td>已上市</td><td>已上市·listedco 招股章程下载超时</td></tr><tr><td>2</td><td>國民技術股份有限公司</td><td>02701</td><td>已上市</td><td>已上市·listedco 招股章程下载超时</td></tr><tr><td>3</td><td>山東寶蓋新材料科技股份有限公司</td><td>08090</td><td>已上市</td><td>已上市·listedco 招股章程下载超时</td></tr><tr><td>4</td><td>希音国际控股有限公司 - W</td><td>00625</td><td>已上市</td><td>已上市·listedco 招股章程下载超时</td></tr><tr><td>5</td><td>本末動力（北京）科技股份有限公司</td><td>—</td><td>处理中(含PHIP)</td><td>官方未刊发文档（秘密递表）</td></tr><tr><td>6</td><td>東鵬飲料(集團)股份有限公司</td><td>09980</td><td>已上市</td><td>已上市·listedco 招股章程下载超时</td></tr><tr><td>7</td><td>深圳市兆威機電股份有限公司</td><td>02692</td><td>已上市</td><td>已上市·listedco 招股章程下载超时</td></tr><tr><td>8</td><td>深圳市沃爾核材股份有限公司</td><td>09981</td><td>已上市</td><td>已上市·listedco 招股章程下载超时</td></tr><tr><td>9</td><td>牧原食品股份有限公司</td><td>02714</td><td>已上市</td><td>已上市·listedco 招股章程下载超时</td></tr><tr><td>10</td><td>聖邦微電子（北京）股份有限公司</td><td>03661</td><td>已上市</td><td>已上市·listedco 招股章程下载超时</td></tr><tr><td>11</td><td>華勤技術股份有限公司</td><td>03296</td><td>已上市</td><td>已上市·listedco 招股章程下载超时</td></tr></tbody></table>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">补齐方式：<code>PYTHONPATH=src python scripts/scan_vie_full.py --workers 3</code>（只补未扫项）。</div>
+</div>
+
+  <div class="foot">
+    数据来源：港交所披露易公开申请版本（Multi-Files 分册）· 由红筹架构穿透系统自动抽取<br>
+    事实性陈述均标注来源分册，可逐条回溯原文；具体数字需业务部门另行核实
+  </div>
+  <button class="printbtn" onclick="window.print()">打印 / 存为 PDF</button>
+</div>
+
+</body></html>

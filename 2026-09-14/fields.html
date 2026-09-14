@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>字段中文说明</title>
+<meta name="description" content="字段的中文含义、取值口径与可信度分级">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="字段中文说明">
+<meta property="og:description" content="字段的中文含义、取值口径与可信度分级">
+<meta property="og:image" content="https://shengc-shv.github.io/redchip-penetration/icon.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:url" content="https://shengc-shv.github.io/redchip-penetration/2026-09-14/fields.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://shengc-shv.github.io/redchip-penetration/icon.png">
+<meta name="format-detection" content="telephone=no">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 14px 56px; background: #f7f7f8;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, Helvetica, sans-serif;
+  color: #333; -webkit-font-smoothing: antialiased; line-height: 1.65; }
+.wrap { max-width: var(--w, 760px); margin: 0 auto; }
+.card { background: #fff; border: 1px solid #e8e8e8; border-radius: 3px;
+  padding: 18px 20px; margin-bottom: 10px; }
+/* 抬头区：白底 + 顶部细红线，红色只做点睛，不做大面积色块 */
+.head { background: #fff; border: 1px solid #e8e8e8; border-top: 3px solid #a30030;
+  border-radius: 3px; padding: 20px 22px; margin-bottom: 10px; }
+.head h1 { margin: 0; font-size: 21px; font-weight: 600; color: #1a1a1a; letter-spacing: .5px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand img { width: 44px; height: 44px; border-radius: 9px; flex: 0 0 auto; }
+.brand .kicker { font-size: 11.5px; color: #a30030; letter-spacing: 2px; margin-bottom: 3px; }
+.brand .code { font-weight: 400; color: #bbb; font-size: 13.5px; }
+.head .meta { font-size: 12.5px; color: #999; }
+.head .concl { margin-top: 14px; padding: 12px 14px; background: #fafafa;
+  border-left: 3px solid #a30030; border-radius: 2px; font-size: 14px; line-height: 1.75; color: #333; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.stat { background: #fff; border: 1px solid #e8e8e8; border-radius: 3px; padding: 11px 13px; }
+.stat .k { font-size: 11.5px; color: #999; }
+.stat .v { font-size: 18px; font-weight: 700; margin-top: 3px; color: #a30030; }
+.stat .u { font-size: 11px; color: #bbb; font-weight: 400; margin-left: 2px; }
+h2 { font-size: 14.5px; margin: 20px 0 10px; display: flex; align-items: center; gap: 8px;
+  color: #1a1a1a; }
+h2 .bar { width: 3px; height: 14px; border-radius: 1px; background: #a30030; }
+.opp { border-left: 2px solid #e0e0e0; padding: 9px 0 9px 14px; margin-bottom: 12px; }
+.opp.a { border-color: #a30030; } .opp.b { border-color: #b8944d; } .opp.c { border-color: #c4c4c4; }
+.opp .t { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.opp .row { font-size: 12.5px; color: #666; margin-top: 4px; }
+.opp .row b { color: #333; font-weight: 600; }
+.tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 2px;
+  font-weight: 600; margin-right: 6px; vertical-align: 1px; }
+.tag.a { background: #fbeff2; color: #92022c; }
+.tag.b { background: #faf5ec; color: #8a6c2f; }
+.tag.c { background: #f2f2f3; color: #666; }
+.tag.n { background: #eef4ef; color: #2f6b38; }
+.tag.w { background: #fbeff2; color: #92022c; }
+table { width: 100%; border-collapse: collapse; font-size: 12.6px; }
+th { text-align: left; font-weight: 600; color: #666; background: #fafafa;
+  padding: 8px 10px; border-bottom: 2px solid #a30030; font-size: 12px; }
+td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; line-height: 1.6; }
+td.k { color: #999; width: 128px; }
+.muted { color: #666; font-size: 12px; line-height: 1.7; }
+.foot { text-align: center; color: #b0b0b0; font-size: 11.5px; margin-top: 20px; line-height: 1.8; }
+.lv { display:inline-block; padding:2px 8px; border-radius:2px; font-size:11.5px;
+  font-weight:600; margin-left:6px; }
+.lv-L1 { background:#eef7f0; color:#2f6b38; }
+.lv-L2 { background:#eef2fa; color:#2b4b8f; }
+.lv-L3 { background:#fdf6e9; color:#8a6c2f; }
+.lv-L4 { background:#f2f2f3; color:#666; }
+.pill { display:inline-block; padding:1px 6px; border-radius:2px; font-size:11px;
+  background:#f7f7f8; color:#666; margin-right:5px; }
+@media (max-width: 640px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  body { padding: 16px 10px 40px; }
+  table { font-size: 12px; }
+}
+/* 定位声明条：行外初筛结果的必要提示，必须显眼但不能喧宾夺主 */
+.notice { background: #fdf7f8; border: 1px solid #f0dde2; border-left: 3px solid #a30030;
+  border-radius: 3px; padding: 9px 12px; font-size: 12px; color: #7a4a55;
+  line-height: 1.7; margin-bottom: 10px; }
+.notice b { color: #92022c; }
+.printbtn { position: fixed; right: 18px; bottom: 18px; padding: 8px 14px; font-size: 13px;
+  background: #fff; border: 1px solid #d8d8d8; border-radius: 3px; color: #a30030;
+  cursor: pointer; font-family: inherit; }
+.printbtn:hover { border-color: #a30030; }
+/* 行内网络若访问不了外部站点，可用浏览器直接打印或存为 PDF 传阅 */
+@media print {
+  body { background: #fff; padding: 0; }
+  .wrap { max-width: none; }
+  .printbtn, .thumb { display: none !important; }
+  .card, .head, .opp, table { break-inside: avoid; }
+  .notice { background: #fff; }
+  .foot { color: #888; }
+  @page { margin: 12mm; }
+}
+</style></head>
+<body><div style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><img src="https://shengc-shv.github.io/redchip-penetration/icon.png" alt="" width="512" height="512"></div><div class="wrap" style="--w:980px">
+  <div class="notice"><b>行外公开信息初筛</b> · 本页数据取自公开披露文件与商业工商数据源，仅用于线索发现；涉及客户准入、授信与合规的判断，须以行内渠道数据复核为准。</div>
+
+  <div class="head">
+    <div class="brand">
+      <img src="icon.png" alt="" width="44" height="44">
+      <div>
+        <div class="kicker">口径文档</div>
+        <h1>字段中文说明 <span class="code"></span></h1>
+      </div>
+    </div>
+    <div class="meta" style="margin-top:10px"><a href="../index.html">← 返回站点首页</a></div>
+    
+  </div>
+
+  <div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">对应文件：<code>data/listing_full.csv</code>（26 列）｜口径：递交日 ≥ 2026 且状态 ∈ {处理中, 含PHIP, 已上市}。<br>⚠️ 全表均为<b>行外公开信息初筛</b>，须经行内渠道复核；关系状态（是否开户/他行锁定）公开不可得，未列入本表。</div>
+<table><thead><tr><th>字段</th><th>中文名</th><th>含义</th><th>取值 / 口径</th><th>来源与可信度</th></tr></thead><tbody><tr><td>【id】</td><td>企业编号</td><td>港交所披露易为新上市申请分配的唯一编号，<b>跨年度唯一</b>，是各表勾稽主键</td><td>整数（如 108832）</td><td>官方清单 JSON</td></tr><tr><td>【name_cn】</td><td>中文企业名</td><td>申请人中文名称，取自官方中文版清单；官方未给中文名时回落英文名</td><td>文本</td><td>官方清单 JSON（中文版）</td></tr><tr><td>【name_en】</td><td>英文企业名</td><td>申请人的英文名称，以官方清单为准（可能与最终招股书微调）</td><td>文本</td><td>官方清单 JSON</td></tr><tr><td>【board】</td><td>上市板块</td><td>申请所在交易板块</td><td>主板 / GEM</td><td>官方清单 JSON</td></tr><tr><td>【status】</td><td>申请状态</td><td>申请当前进展。<b>已按口径剔除「失效/撤回/被拒绝/被发回」</b></td><td>处理中 / 处理中(含PHIP) / 已上市</td><td>官方清单 JSON</td></tr><tr><td>【stock_code】</td><td>股票代码</td><td>已上市企业的港交所股票代码；尚未上市为空</td><td>5 位代码（如 00700）</td><td>官方清单 JSON（listed 的 st 字段）</td></tr><tr><td>【submit_date】</td><td>递表日</td><td>上市申请首次递交日，<b>取官方字段，非抓取日</b></td><td>YYYY-MM-DD（由官方 DD/MM/YYYY 归一化）</td><td>官方清单 JSON（d 字段）</td></tr><tr><td>【gd_flag】</td><td>广东名称标记</td><td>企业名称是否含广东地名。<b>仅作结果表一列，不作筛选闸门</b></td><td>是 / 空</td><td>名称启发式（23 个粤城市词中英匹配）</td></tr><tr><td>【gd_l1_hit】</td><td>名称命中词</td><td>名称匹配命中的具体地名，便于复核</td><td>文本（如 廣州 / Shenzhen）</td><td>名称启发式</td></tr><tr><td>【is_offshore】</td><td>是否离岸注册</td><td>上市主体注册地是否为开曼/百慕大，即<b>红筹形态的必要条件</b></td><td>是 / 空</td><td>封面页权威口径（可信）</td></tr><tr><td>【domicile】</td><td>注册地（封面页）</td><td>上市主体注册地。<b>只认封面页/扉页固定句式</b>，不采信正文其他章节的法域提及</td><td>开曼群岛 / 百慕大 / 中国(境内) / 香港 / 空(待核验)</td><td>招股书封面页（权威）</td></tr><tr><td>【scan_method】</td><td>判定通道</td><td>注册地取数所走的通道</td><td>cover（封面分册）/ cover-full（整份首页）/ 空</td><td>本项目流程</td></tr><tr><td>【cover_section】</td><td>封面依据分册</td><td>命中注册地句式所在的分册名，可据此回原文定位</td><td>WARNING / IMPORTANT / full-pdf / listedco:prospectus</td><td>披露易 Multi-Files</td></tr><tr><td>【cover_evidence】</td><td>封面原文句</td><td>注册地判定所依据的原文片段，<b>可直接用于复核</b></td><td>文本（英文原句）</td><td>招股书原文</td></tr><tr><td>【gd_opco】</td><td>广东运营线索</td><td>含广东地名且带实体/地址语境的原文片段</td><td>文本</td><td>概要 / 公司资料 / 历史沿革分册（<b>线索，非结论</b>）</td></tr><tr><td>【gd_opco_count】</td><td>广东线索词频</td><td>广东城市词在上述分册中出现的次数，作为线索强度</td><td>整数（阈值 ≥3 记为线索）</td><td>同上（<b>线索，非结论</b>）</td></tr><tr><td>【gd_opco_source】</td><td>线索来源与构成</td><td>格式为「分册名</td><td>城市词×次数」，便于判断依据</td><td>文本（如 SUMMARY</td><td>shenzhen×34, guangdong×1）</td><td>同上</td></tr><tr><td>【gd_tier】</td><td>广东线索分层</td><td>按命中分册的权威性分层：<code>核心</code> = 命中「概要 / 公司资料」（公司自述总部/运营实体/主要银行）；<code>补充</code> = 仅命中「历史沿革」（该章含股东/投资方/中介地址，噪音高）</td><td>核心 / 补充(仅历史沿革章) / 补充(listedco全文) / 空</td><td>本项目推导（<b>分层规则见筛选条件文档</b>）</td></tr><tr><td>【is_vie】</td><td>是否 VIE</td><td>上市主体<b>当前</b>是否通过协议控制（VIE）控制境内运营实体。只描述控制方式，<b>不参与地域判定</b></td><td>是 / 否 / 否(仅历史安排) / 待核验</td><td>概要+风险因素章专有表述（可信度中高）</td></tr><tr><td>【vie_scanned】</td><td>VIE 是否已判定</td><td>区分「未扫」与「扫过=否」；未扫的 is_vie 不可用</td><td>是 / 空</td><td>本项目流程</td></tr><tr><td>【vie_terminated】</td><td>是否仅历史 VIE</td><td>曾存在协议控制安排但披露为已终止/历史安排，<b>不计入当前 VIE</b></td><td>是 / 空</td><td>招股书历史沿革章</td></tr><tr><td>【vie_source】</td><td>VIE 依据分册</td><td>VIE 结论所在分册，可据此回原文定位</td><td>SUMMARY / RISK FACTORS / HISTORY… / listedco:prospectus</td><td>披露易 Multi-Files</td></tr><tr><td>【vie_evidence】</td><td>VIE 原文证据</td><td>VIE 判定所依据的原文片段，<b>可直接用于复核</b></td><td>文本（英文原句）</td><td>招股书原文</td></tr><tr><td>【redchip_l2】</td><td>红筹判定</td><td>由「离岸注册 + 广东运营线索」推导：是(线索待核) / 疑似 / 否-H股 / 否-其他 / 待核验</td><td>文本</td><td>本项目推导（<b>线索级</b>）</td></tr><tr><td>【doc_available】</td><td>文档可得性</td><td>能否取得用于判定的招股书文档</td><td>有申请版本 / 仅listedco可补 / 官方未刊发</td><td>官方清单 JSON</td></tr><tr><td>【app_proof_url】</td><td>申请版本链接</td><td>披露易申请版本 PDF 直链，可点开核对原文</td><td>URL</td><td>官方清单 JSON</td></tr></tbody></table>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>可信度分级（重要，用于判断哪些数字能用）</h2>
+  <table><thead><tr><th>等级</th><th>字段</th><th>说明</th></tr></thead><tbody><tr><td><b>高（可直接用）</b></td><td><code>id</code> <code>name_en</code> <code>name_cn</code> <code>board</code> <code>status</code> <code>stock_code</code> <code>submit_date</code> <code>app_proof_url</code></td><td>港交所官方清单原始字段，未加工</td></tr><tr><td><b>高（权威口径）</b></td><td><code>domicile</code> <code>is_offshore</code> <code>scan_method</code> <code>cover_section</code> <code>cover_evidence</code></td><td>取招股书<b>封面页固定句式</b>，可逐条回原文复核</td></tr><tr><td><b>中（先判定后分类）</b></td><td><code>is_vie</code> <code>vie_scanned</code> <code>vie_terminated</code> <code>vie_source</code> <code>vie_evidence</code></td><td>只认专有表述（大小写敏感）+ 终止感知；仍属判定，需复核</td></tr><tr><td><b>低（线索，须人工复核）</b></td><td><code>gd_flag</code> <code>gd_l1_hit</code> <code>gd_opco</code> <code>gd_opco_count</code> <code>gd_opco_source</code></td><td>名称启发式 / 城市词频，<b>不能单独作为结论</b></td></tr><tr><td><b>推导</b></td><td><code>redchip_l2</code> <code>doc_available</code></td><td>由上述字段按规则推导</td></tr></tbody></table>
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>复核入口</h2>
+  <ul style="margin:6px 0;padding-left:20px"><li>注册地：看 <code>cover_evidence</code> 原文句 → 对照 <code>cover_section</code> 分册 → 用 <code>app_proof_url</code> 打开 PDF 首屏；</li><li>广东连接：看 <code>gd_opco_source</code>（分册+词频）→ 打开对应分册搜索城市词；</li><li>VIE：看 <code>vie_source</code> + <code>vie_evidence</code> → 打开 <code>SUMMARY</code> / <code>RISK FACTORS</code> 章搜索 <code>VIE</code>、<code>Contractual Arrangements</code>；</li><li>汇编视图：<code>output/redchip_gd_evidence_cards.md</code>（广东红筹候选）、<code>output/vie_evidence_cards.md</code>（VIE）。</li></ul>
+</div>
+
+  <div class="foot">
+    数据来源：港交所披露易公开申请版本（Multi-Files 分册）· 由红筹架构穿透系统自动抽取<br>
+    事实性陈述均标注来源分册，可逐条回溯原文；具体数字需业务部门另行核实
+  </div>
+  <button class="printbtn" onclick="window.print()">打印 / 存为 PDF</button>
+</div>
+
+</body></html>
