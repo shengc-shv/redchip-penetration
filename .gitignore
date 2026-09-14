@@ -13,5 +13,8 @@ output/
 *.sqlite
 *.sqlite3
 
+# 运行日志（脚本 stdout 落盘，可重建）
+*.log
+
 .env
 .DS_Store
