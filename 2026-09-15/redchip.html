@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>红筹视图（离岸 59 家）</title>
+<meta name="description" content="封面页确认离岸注册的全部申请人，含广东线索分层">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="红筹视图（离岸 59 家）">
+<meta property="og:description" content="封面页确认离岸注册的全部申请人，含广东线索分层">
+<meta property="og:image" content="https://shengc-shv.github.io/redchip-penetration/icon.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:url" content="https://shengc-shv.github.io/redchip-penetration/2026-09-15/redchip.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://shengc-shv.github.io/redchip-penetration/icon.png">
+<meta name="format-detection" content="telephone=no">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 14px 56px; background: #f7f7f8;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, Helvetica, sans-serif;
+  color: #333; -webkit-font-smoothing: antialiased; line-height: 1.65; }
+.wrap { max-width: var(--w, 760px); margin: 0 auto; }
+.card { background: #fff; border: 1px solid #e8e8e8; border-radius: 3px;
+  padding: 18px 20px; margin-bottom: 10px; }
+/* 抬头区：白底 + 顶部细红线，红色只做点睛，不做大面积色块 */
+.head { background: #fff; border: 1px solid #e8e8e8; border-top: 3px solid #a30030;
+  border-radius: 3px; padding: 20px 22px; margin-bottom: 10px; }
+.head h1 { margin: 0; font-size: 21px; font-weight: 600; color: #1a1a1a; letter-spacing: .5px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand img { width: 44px; height: 44px; border-radius: 9px; flex: 0 0 auto; }
+.brand .kicker { font-size: 11.5px; color: #a30030; letter-spacing: 2px; margin-bottom: 3px; }
+.brand .code { font-weight: 400; color: #bbb; font-size: 13.5px; }
+.head .meta { font-size: 12.5px; color: #999; }
+.head .concl { margin-top: 14px; padding: 12px 14px; background: #fafafa;
+  border-left: 3px solid #a30030; border-radius: 2px; font-size: 14px; line-height: 1.75; color: #333; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.stat { background: #fff; border: 1px solid #e8e8e8; border-radius: 3px; padding: 11px 13px; }
+.stat .k { font-size: 11.5px; color: #999; }
+.stat .v { font-size: 18px; font-weight: 700; margin-top: 3px; color: #a30030; }
+.stat .u { font-size: 11px; color: #bbb; font-weight: 400; margin-left: 2px; }
+h2 { font-size: 14.5px; margin: 20px 0 10px; display: flex; align-items: center; gap: 8px;
+  color: #1a1a1a; }
+h2 .bar { width: 3px; height: 14px; border-radius: 1px; background: #a30030; }
+.opp { border-left: 2px solid #e0e0e0; padding: 9px 0 9px 14px; margin-bottom: 12px; }
+.opp.a { border-color: #a30030; } .opp.b { border-color: #b8944d; } .opp.c { border-color: #c4c4c4; }
+.opp .t { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.opp .row { font-size: 12.5px; color: #666; margin-top: 4px; }
+.opp .row b { color: #333; font-weight: 600; }
+.tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 2px;
+  font-weight: 600; margin-right: 6px; vertical-align: 1px; }
+.tag.a { background: #fbeff2; color: #92022c; }
+.tag.b { background: #faf5ec; color: #8a6c2f; }
+.tag.c { background: #f2f2f3; color: #666; }
+.tag.n { background: #eef4ef; color: #2f6b38; }
+.tag.w { background: #fbeff2; color: #92022c; }
+table { width: 100%; border-collapse: collapse; font-size: 12.6px; }
+th { text-align: left; font-weight: 600; color: #666; background: #fafafa;
+  padding: 8px 10px; border-bottom: 2px solid #a30030; font-size: 12px; }
+td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; line-height: 1.6; }
+td.k { color: #999; width: 128px; }
+.muted { color: #666; font-size: 12px; line-height: 1.7; }
+.foot { text-align: center; color: #b0b0b0; font-size: 11.5px; margin-top: 20px; line-height: 1.8; }
+.lv { display:inline-block; padding:2px 8px; border-radius:2px; font-size:11.5px;
+  font-weight:600; margin-left:6px; }
+.lv-L1 { background:#eef7f0; color:#2f6b38; }
+.lv-L2 { background:#eef2fa; color:#2b4b8f; }
+.lv-L3 { background:#fdf6e9; color:#8a6c2f; }
+.lv-L4 { background:#f2f2f3; color:#666; }
+.pill { display:inline-block; padding:1px 6px; border-radius:2px; font-size:11px;
+  background:#f7f7f8; color:#666; margin-right:5px; }
+@media (max-width: 640px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  body { padding: 16px 10px 40px; }
+  table { font-size: 12px; }
+}
+/* 定位声明条：行外初筛结果的必要提示，必须显眼但不能喧宾夺主 */
+.notice { background: #fdf7f8; border: 1px solid #f0dde2; border-left: 3px solid #a30030;
+  border-radius: 3px; padding: 9px 12px; font-size: 12px; color: #7a4a55;
+  line-height: 1.7; margin-bottom: 10px; }
+.notice b { color: #92022c; }
+.printbtn { position: fixed; right: 18px; bottom: 18px; padding: 8px 14px; font-size: 13px;
+  background: #fff; border: 1px solid #d8d8d8; border-radius: 3px; color: #a30030;
+  cursor: pointer; font-family: inherit; }
+.printbtn:hover { border-color: #a30030; }
+/* 行内网络若访问不了外部站点，可用浏览器直接打印或存为 PDF 传阅 */
+@media print {
+  body { background: #fff; padding: 0; }
+  .wrap { max-width: none; }
+  .printbtn, .thumb { display: none !important; }
+  .card, .head, .opp, table { break-inside: avoid; }
+  .notice { background: #fff; }
+  .foot { color: #888; }
+  @page { margin: 12mm; }
+}
+</style></head>
+<body><div style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><img src="https://shengc-shv.github.io/redchip-penetration/icon.png" alt="" width="512" height="512"></div><div class="wrap" style="--w:980px">
+  <div class="notice"><b>行外公开信息初筛</b> · 本页数据取自公开披露文件与商业工商数据源，仅用于线索发现；涉及客户准入、授信与合规的判断，须以行内渠道数据复核为准。</div>
+
+  <div class="head">
+    <div class="brand">
+      <img src="icon.png" alt="" width="44" height="44">
+      <div>
+        <div class="kicker">全量摸底</div>
+        <h1>红筹视图（离岸 59 家） <span class="code"></span></h1>
+      </div>
+    </div>
+    <div class="meta" style="margin-top:10px"><a href="../index.html">← 返回站点首页</a></div>
+    
+  </div>
+
+  <div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">⚠️ <b>行外公开信息初筛，须经行内渠道复核。</b> 关系状态（是否已开户/他行锁定）公开不可得。<br>数据来源：港交所披露易「新上市申請版本及相關資料」官方静态 JSON（全状态 × 板块，免鉴权，已按 id 去重）。<br>注册地口径：申请版本<b>封面页/扉页固定句式</b>（<code>Incorporated in the Cayman Islands with limited liability</code> /<br><code>A joint stock company incorporated in the People's Republic of China with limited liability</code>），<br>经 Multi-Files 分册目录仅下載封面分册（~110KB）后由 pypdf 抽取。<b>不采信正文其他章节的法域提及。</b><br>已知盲区：以非公开方式递表者，官方不刊发申请版本，清单与 PDF 均不可见。<br>生成时间：2026-09-14 08:52（北京时间）｜本视图 59 家。</div>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">红筹 = 离岸注册（开曼/百慕大）的上市主体 + 境内（含广东）运营实体。<br>本视图给出<b>全部离岸注册申请人</b>（不按名字过滤），是「红筹全貌」的<b>上界</b>。<br>其中检出<b>广东运营线索</b> 38 家（核心层公司自述章 25 + 补充层仅历史沿革章 13）；<br>其余 21 家未检出广东线索（多为生物医药/其他省份/纯境外业务）。</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>一、广东红筹候选 · 核心层（公司自述章命中，25 家）</h2>
+  <div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">⚠️ 线索强度 = 广东城市词在「概要 / 公司资料」分册中的出现次数；<b>不是结论</b>，须人工复核原文。</div>
+<table><thead><tr><th>#</th><th>企业名称</th><th>板块</th><th>状态</th><th>代码</th><th>递表日</th><th>注册地(封面)</th><th>离岸</th><th>广东线索(词频)</th><th>线索来源分册</th><th>VIE</th><th>红筹判定</th><th>文档</th><th>关系状态</th></tr></thead><tbody><tr><td>1</td><td>Growatt Technology Co., Ltd</td><td>主板</td><td>处理中</td><td>—</td><td>2026-06-29</td><td>开曼群岛</td><td>是</td><td>核心(185)</td><td>SUMMARY</td><td>shenzhen×139, guangdong×13, qingyuan</td><td>否(仅历史安排)</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>2</td><td>聖火科技集團有限公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-03-13</td><td>开曼群岛</td><td>是</td><td>核心(170)</td><td>SUMMARY</td><td>guangdong×142, guangzhou×28</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>3</td><td>錢大媽國際控股有限公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-08-21</td><td>开曼群岛</td><td>是</td><td>核心(149)</td><td>CORPORATE INFORMATION</td><td>guangzhou×84, shenzhen</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>4</td><td>Yueyuan Group Holdings Company Limited</td><td>GEM</td><td>处理中</td><td>—</td><td>2026-07-09</td><td>开曼群岛</td><td>是</td><td>核心(120)</td><td>SUMMARY</td><td>shenzhen×98, zhuhai×13, guangdong×8,</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>5</td><td>麓鵬製藥有限公司 - B</td><td>主板</td><td>处理中</td><td>—</td><td>2026-05-28</td><td>开曼群岛</td><td>是</td><td>核心(102)</td><td>CORPORATE INFORMATION</td><td>guangzhou×71, shenzhen</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>6</td><td>Hope Sea Inc.</td><td>主板</td><td>处理中</td><td>—</td><td>2026-03-15</td><td>开曼群岛</td><td>是</td><td>核心(81)</td><td>SUMMARY</td><td>shenzhen×75, guangdong×5, zhuhai×1</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>7</td><td>TOP TOY International Group Limited</td><td>主板</td><td>处理中</td><td>—</td><td>2026-03-31</td><td>开曼群岛</td><td>是</td><td>核心(78)</td><td>CORPORATE INFORMATION</td><td>guangzhou×33, dongguan</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>8</td><td>拉拉科技控股有限公司 - W</td><td>主板</td><td>处理中</td><td>—</td><td>2026-04-30</td><td>开曼群岛</td><td>是</td><td>核心(76)</td><td>SUMMARY</td><td>shenzhen×61, guangzhou×9, guangdong×</td><td>是</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>9</td><td>Casstime Holdings Ltd.</td><td>主板</td><td>处理中</td><td>—</td><td>2026-04-16</td><td>开曼群岛</td><td>是</td><td>核心(74)</td><td>CORPORATE INFORMATION</td><td>shenzhen×68, guangzhou</td><td>否(仅历史安排)</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>10</td><td>Immvira Bioscience Inc. - B</td><td>主板</td><td>处理中</td><td>—</td><td>2026-07-16</td><td>开曼群岛</td><td>是</td><td>核心(57)</td><td>CORPORATE INFORMATION</td><td>shenzhen×56, zhuhai×1</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>11</td><td>Radvance Cayman Limited</td><td>主板</td><td>处理中</td><td>—</td><td>2026-03-13</td><td>开曼群岛</td><td>是</td><td>核心(49)</td><td>CORPORATE INFORMATION</td><td>shenzhen×44, zhuhai×3,</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>12</td><td>Axbio International Limited - B</td><td>主板</td><td>处理中</td><td>—</td><td>2026-05-14</td><td>开曼群岛</td><td>是</td><td>核心(49)</td><td>SUMMARY</td><td>shenzhen×30, shantou×12, guangdong×4</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>13</td><td>Aqara International Ltd</td><td>主板</td><td>处理中</td><td>—</td><td>2026-04-12</td><td>开曼群岛</td><td>是</td><td>核心(43)</td><td>CORPORATE INFORMATION</td><td>shenzhen×43</td><td>否(仅历史安排)</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>14</td><td>FJD Inc.</td><td>主板</td><td>处理中</td><td>—</td><td>2026-06-05</td><td>开曼群岛</td><td>是</td><td>核心(40)</td><td>CORPORATE INFORMATION</td><td>shenzhen×22, guangdong</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>15</td><td>Xiaoe Inc.</td><td>主板</td><td>处理中</td><td>—</td><td>2026-05-19</td><td>开曼群岛</td><td>是</td><td>核心(38)</td><td>CORPORATE INFORMATION</td><td>shenzhen×33, guangdong</td><td>否(仅历史安排)</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>16</td><td>Exegenesis Bio Inc. - B</td><td>主板</td><td>处理中</td><td>—</td><td>2026-08-28</td><td>开曼群岛</td><td>是</td><td>核心(35)</td><td>SUMMARY</td><td>guangzhou×26, guangdong×6, shenzhen×</td><td>否(仅历史安排)</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>17</td><td>XREAL Ltd.</td><td>主板</td><td>处理中</td><td>—</td><td>2026-04-01</td><td>开曼群岛</td><td>是</td><td>核心(34)</td><td>CORPORATE INFORMATION</td><td>shenzhen×32, zhuhai×2</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>18</td><td>Eccogene Inc. - B</td><td>主板</td><td>处理中</td><td>—</td><td>2026-04-29</td><td>开曼群岛</td><td>是</td><td>核心(沿革章·实体内述)(34)</td><td>HISTORY, REORGANIZATION AND CORPORATE STRUCTUR</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>19</td><td>隨手播集團公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-03-27</td><td>开曼群岛</td><td>是</td><td>核心(33)</td><td>SUMMARY</td><td>guangzhou×16, guangdong×9, zhuhai×6,</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>20</td><td>SmartMore Inc.</td><td>主板</td><td>处理中</td><td>—</td><td>2026-03-16</td><td>开曼群岛</td><td>是</td><td>核心(31)</td><td>CORPORATE INFORMATION</td><td>shenzhen×29, guangdong</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>21</td><td>Elpiscience Biopharmaceuticals, Inc. - B</td><td>主板</td><td>处理中</td><td>—</td><td>2026-06-08</td><td>开曼群岛</td><td>是</td><td>核心(沿革章·实体内述)(30)</td><td>HISTORY AND CORPORATE STRUCTURE</td><td>guangzhou×24</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>22</td><td>環球園藝有限公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-06-25</td><td>开曼群岛</td><td>是</td><td>核心(21)</td><td>SUMMARY</td><td>huizhou×18, shenzhen×2, guangdong×1</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>23</td><td>暖哇洞察科技有限公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-04-13</td><td>开曼群岛</td><td>是</td><td>核心(14)</td><td>SUMMARY</td><td>guangzhou×7, shenzhen×6, zhongshan×1</td><td>否(仅历史安排)</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>24</td><td>安聯國際控股有限公司</td><td>GEM</td><td>处理中</td><td>—</td><td>2026-07-24</td><td>开曼群岛</td><td>是</td><td>核心(13)</td><td>SUMMARY</td><td>guangzhou×11, guangdong×2</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>25</td><td>中旅港澳文旅控股有限公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-05-20</td><td>开曼群岛</td><td>是</td><td>核心(3)</td><td>SUMMARY</td><td>shenzhen×2, zhuhai×1</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr></tbody></table>
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>一·补、广东红筹候选 · 补充层（仅历史沿革章命中，13 家）</h2>
+  <div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">⚠️ 「历史沿革」章含股东 / 投资方 / 中介机构地址，城市名噪音显著更高，故降级为补充层，须逐家复核。</div>
+<table><thead><tr><th>#</th><th>企业名称</th><th>板块</th><th>状态</th><th>代码</th><th>递表日</th><th>注册地(封面)</th><th>离岸</th><th>广东线索(词频)</th><th>线索来源分册</th><th>VIE</th><th>红筹判定</th><th>文档</th><th>关系状态</th></tr></thead><tbody><tr><td>1</td><td>真實生物科技有限公司 - B</td><td>主板</td><td>处理中</td><td>—</td><td>2026-05-29</td><td>开曼群岛</td><td>是</td><td>补充(仅历史沿革章)(35)</td><td>HISTORY, REORGANIZATION AND CORPORATE STRUCTUR</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>2</td><td>Huge Dental Limited</td><td>主板</td><td>处理中</td><td>—</td><td>2026-02-27</td><td>开曼群岛</td><td>是</td><td>补充(仅历史沿革章)(25)</td><td>HISTORY, REORGANIZATION AND CORPORATE STRUCTUR</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>3</td><td>岸邁生物科技有限公司 - B</td><td>主板</td><td>处理中</td><td>—</td><td>2026-07-06</td><td>开曼群岛</td><td>是</td><td>补充(仅历史沿革章)(11)</td><td>HISTORY, DEVELOPMENT AND CORPORATE STRUCTURE</td><td></td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>4</td><td>米多多集團股份有限公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-06-12</td><td>开曼群岛</td><td>是</td><td>补充(仅历史沿革章)(8)</td><td>HISTORY, REORGANIZATION AND CORPORATE STRUCTUR</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>5</td><td>巴奴国际控股有限公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-06-17</td><td>开曼群岛</td><td>是</td><td>补充(仅历史沿革章)(8)</td><td>HISTORY, REORGANIZATION AND CORPORATE STRUCTUR</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>6</td><td>明宇制药有限公司 - B</td><td>主板</td><td>处理中</td><td>—</td><td>2026-07-08</td><td>开曼群岛</td><td>是</td><td>补充(仅历史沿革章)(8)</td><td>HISTORY, DEVELOPMENT AND CORPORATE STRUCTURE</td><td></td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>7</td><td>微脉公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-04-20</td><td>开曼群岛</td><td>是</td><td>补充(仅历史沿革章)(6)</td><td>HISTORY, REORGANIZATION AND CORPORATE STRUCTUR</td><td>否(仅历史安排)</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>8</td><td>長宏新材集團有限公司</td><td>GEM</td><td>处理中</td><td>—</td><td>2026-04-30</td><td>开曼群岛</td><td>是</td><td>补充(仅历史沿革章)(6)</td><td>HISTORY, REORGANISATION AND CORPORATE STRUCTUR</td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>9</td><td>Yusheng Holdings Limited</td><td>主板</td><td>处理中</td><td>—</td><td>2026-05-06</td><td>开曼群岛</td><td>是</td><td>补充(仅历史沿革章)(6)</td><td>HISTORY, REORGANIZATION AND CORPORATE STRUCTUR</td><td>否(仅历史安排)</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>10</td><td>米連科技有限公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-04-01</td><td>开曼群岛</td><td>是</td><td>补充(仅历史沿革章)(5)</td><td>HISTORY, REORGANIZATION AND CORPORATE STRUCTUR</td><td>否(仅历史安排)</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>11</td><td>Megatronix Inc.</td><td>主板</td><td>处理中</td><td>—</td><td>2026-05-29</td><td>开曼群岛</td><td>是</td><td>补充(仅历史沿革章)(5)</td><td>HISTORY, DEVELOPMENT AND CORPORATE STRUCTURE</td><td></td><td>否</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>12</td><td>太合音樂集團</td><td>主板</td><td>处理中</td><td>—</td><td>2026-06-22</td><td>开曼群岛</td><td>是</td><td>补充(仅历史沿革章)(4)</td><td>HISTORY, REORGANIZATION AND CORPORATE STRUCTUR</td><td>否(仅历史安排)</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>13</td><td>Yangtuo Holdings Inc.</td><td>主板</td><td>处理中</td><td>—</td><td>2026-06-29</td><td>开曼群岛</td><td>是</td><td>补充(仅历史沿革章)(4)</td><td>HISTORY, REORGANIZATION AND CORPORATE STRUCTUR</td><td>否(仅历史安排)</td><td>是(线索待核)</td><td>有申请版本</td><td>待行内核验</td></tr></tbody></table>
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>二、其余离岸申请人（未检出广东线索，21 家）</h2>
+  <table><thead><tr><th>#</th><th>企业名称</th><th>板块</th><th>状态</th><th>代码</th><th>递表日</th><th>注册地(封面)</th><th>离岸</th><th>广东线索(词频)</th><th>线索来源分册</th><th>VIE</th><th>红筹判定</th><th>文档</th><th>关系状态</th></tr></thead><tbody><tr><td>1</td><td>樂欣戶外國際有限公司</td><td>主板</td><td>已上市</td><td>02720</td><td>2026-01-25</td><td>开曼群岛</td><td>是</td><td>—</td><td>listedco:prospectus(前80页)</td><td></td><td>否</td><td>疑似</td><td>仅listedco可补</td><td>待行内核验</td></tr><tr><td>2</td><td>Manycore Tech Inc.</td><td>主板</td><td>已上市</td><td>00068</td><td>2026-03-29</td><td>开曼群岛</td><td>是</td><td>—</td><td>listedco:prospectus(前80页)</td><td></td><td>是</td><td>疑似</td><td>仅listedco可补</td><td>待行内核验</td></tr><tr><td>3</td><td>焦點國際有限公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-03-31</td><td>开曼群岛</td><td>是</td><td>(1)</td><td>HISTORY, REORGANISATION AND CORPORATE STRUCTUR</td><td>否</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>4</td><td>自然堂全球控股有限公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-04-02</td><td>开曼群岛</td><td>是</td><td>(1)</td><td>SUMMARY</td><td>shenzhen×1</td><td>否</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>5</td><td>Sirius Therapeutics - B</td><td>主板</td><td>处理中</td><td>—</td><td>2026-04-08</td><td>开曼群岛</td><td>是</td><td>(1)</td><td>HISTORY, DEVELOPMENT AND CORPORATE STRUCTURE</td><td></td><td>否</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>6</td><td>君綺控股有限公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-04-30</td><td>开曼群岛</td><td>是</td><td>—</td><td>—</td><td>否</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>7</td><td>Extransfer Limited - W</td><td>主板</td><td>处理中</td><td>—</td><td>2026-05-08</td><td>开曼群岛</td><td>是</td><td>—</td><td>—</td><td>否(仅历史安排)</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>8</td><td>翹石國際金融集團</td><td>GEM</td><td>处理中</td><td>—</td><td>2026-05-11</td><td>开曼群岛</td><td>是</td><td>—</td><td>—</td><td>否</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>9</td><td>龍豐集團控股有限公司</td><td>主板</td><td>已上市</td><td>02290</td><td>2026-05-17</td><td>开曼群岛</td><td>是</td><td>—</td><td>listedco:prospectus(前80页)</td><td></td><td>否</td><td>疑似</td><td>仅listedco可补</td><td>待行内核验</td></tr><tr><td>10</td><td>普祥健康控股有限公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-05-22</td><td>开曼群岛</td><td>是</td><td>—</td><td>—</td><td>是</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>11</td><td>派想未來集團</td><td>主板</td><td>处理中</td><td>—</td><td>2026-06-10</td><td>开曼群岛</td><td>是</td><td>(2)</td><td>HISTORY, DEVELOPMENT AND CORPORATE STRUCTURE</td><td></td><td>否</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>12</td><td>救世集團有限公司</td><td>GEM</td><td>处理中</td><td>—</td><td>2026-06-16</td><td>开曼群岛</td><td>是</td><td>—</td><td>—</td><td>否</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>13</td><td>聚慧食品科技有限公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-06-17</td><td>开曼群岛</td><td>是</td><td>—</td><td>—</td><td>否</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>14</td><td>MOMENTA GLOBAL LIMITED - W</td><td>主板</td><td>已上市</td><td>06880</td><td>2026-06-23</td><td>开曼群岛</td><td>是</td><td>—</td><td>listedco:prospectus(前80页)</td><td></td><td>否</td><td>疑似</td><td>仅listedco可补</td><td>待行内核验</td></tr><tr><td>15</td><td>保濟元和(TCM)有限公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-07-31</td><td>开曼群岛</td><td>是</td><td>—</td><td>—</td><td>否</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>16</td><td>Tyligand Bioscience Ltd. - B</td><td>主板</td><td>处理中</td><td>—</td><td>2026-08-21</td><td>开曼群岛</td><td>是</td><td>(2)</td><td>HISTORY, DEVELOPMENT AND CORPORATE STRUCTURE</td><td></td><td>否</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>17</td><td>興明亞洲控股有限公司</td><td>GEM</td><td>处理中</td><td>—</td><td>2026-08-21</td><td>开曼群岛</td><td>是</td><td>(1)</td><td>SUMMARY</td><td>guangdong×1</td><td>否</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>18</td><td>焯力國際控股有限公司</td><td>GEM</td><td>处理中</td><td>—</td><td>2026-08-25</td><td>开曼群岛</td><td>是</td><td>—</td><td>—</td><td>否</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>19</td><td>Frontera Therapeutics - B</td><td>主板</td><td>处理中</td><td>—</td><td>2026-08-28</td><td>开曼群岛</td><td>是</td><td>—</td><td>—</td><td>否(仅历史安排)</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>20</td><td>地中海度假集團</td><td>主板</td><td>处理中</td><td>—</td><td>2026-08-28</td><td>开曼群岛</td><td>是</td><td>(2)</td><td>HISTORY, REORGANIZATION AND CORPORATE STRUCTUR</td><td>否</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr><tr><td>21</td><td>御康諾國際健康有限公司</td><td>主板</td><td>处理中</td><td>—</td><td>2026-08-31</td><td>开曼群岛</td><td>是</td><td>—</td><td>—</td><td>否</td><td>疑似</td><td>有申请版本</td><td>待行内核验</td></tr></tbody></table>
+</div>
+
+  <div class="foot">
+    数据来源：港交所披露易公开申请版本（Multi-Files 分册）· 由红筹架构穿透系统自动抽取<br>
+    事实性陈述均标注来源分册，可逐条回溯原文；具体数字需业务部门另行核实
+  </div>
+  <button class="printbtn" onclick="window.print()">打印 / 存为 PDF</button>
+</div>
+
+</body></html>

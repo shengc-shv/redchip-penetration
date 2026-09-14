@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>结论与方法论修正</title>
+<meta name="description" content="人口 474 家 · 注册地分布 · 旧口径 19 条假阳性翻案">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="结论与方法论修正">
+<meta property="og:description" content="人口 474 家 · 注册地分布 · 旧口径 19 条假阳性翻案">
+<meta property="og:image" content="https://shengc-shv.github.io/redchip-penetration/icon.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:url" content="https://shengc-shv.github.io/redchip-penetration/2026-09-15/conclusion.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://shengc-shv.github.io/redchip-penetration/icon.png">
+<meta name="format-detection" content="telephone=no">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 14px 56px; background: #f7f7f8;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, Helvetica, sans-serif;
+  color: #333; -webkit-font-smoothing: antialiased; line-height: 1.65; }
+.wrap { max-width: var(--w, 760px); margin: 0 auto; }
+.card { background: #fff; border: 1px solid #e8e8e8; border-radius: 3px;
+  padding: 18px 20px; margin-bottom: 10px; }
+/* 抬头区：白底 + 顶部细红线，红色只做点睛，不做大面积色块 */
+.head { background: #fff; border: 1px solid #e8e8e8; border-top: 3px solid #a30030;
+  border-radius: 3px; padding: 20px 22px; margin-bottom: 10px; }
+.head h1 { margin: 0; font-size: 21px; font-weight: 600; color: #1a1a1a; letter-spacing: .5px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand img { width: 44px; height: 44px; border-radius: 9px; flex: 0 0 auto; }
+.brand .kicker { font-size: 11.5px; color: #a30030; letter-spacing: 2px; margin-bottom: 3px; }
+.brand .code { font-weight: 400; color: #bbb; font-size: 13.5px; }
+.head .meta { font-size: 12.5px; color: #999; }
+.head .concl { margin-top: 14px; padding: 12px 14px; background: #fafafa;
+  border-left: 3px solid #a30030; border-radius: 2px; font-size: 14px; line-height: 1.75; color: #333; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.stat { background: #fff; border: 1px solid #e8e8e8; border-radius: 3px; padding: 11px 13px; }
+.stat .k { font-size: 11.5px; color: #999; }
+.stat .v { font-size: 18px; font-weight: 700; margin-top: 3px; color: #a30030; }
+.stat .u { font-size: 11px; color: #bbb; font-weight: 400; margin-left: 2px; }
+h2 { font-size: 14.5px; margin: 20px 0 10px; display: flex; align-items: center; gap: 8px;
+  color: #1a1a1a; }
+h2 .bar { width: 3px; height: 14px; border-radius: 1px; background: #a30030; }
+.opp { border-left: 2px solid #e0e0e0; padding: 9px 0 9px 14px; margin-bottom: 12px; }
+.opp.a { border-color: #a30030; } .opp.b { border-color: #b8944d; } .opp.c { border-color: #c4c4c4; }
+.opp .t { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.opp .row { font-size: 12.5px; color: #666; margin-top: 4px; }
+.opp .row b { color: #333; font-weight: 600; }
+.tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 2px;
+  font-weight: 600; margin-right: 6px; vertical-align: 1px; }
+.tag.a { background: #fbeff2; color: #92022c; }
+.tag.b { background: #faf5ec; color: #8a6c2f; }
+.tag.c { background: #f2f2f3; color: #666; }
+.tag.n { background: #eef4ef; color: #2f6b38; }
+.tag.w { background: #fbeff2; color: #92022c; }
+table { width: 100%; border-collapse: collapse; font-size: 12.6px; }
+th { text-align: left; font-weight: 600; color: #666; background: #fafafa;
+  padding: 8px 10px; border-bottom: 2px solid #a30030; font-size: 12px; }
+td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; line-height: 1.6; }
+td.k { color: #999; width: 128px; }
+.muted { color: #666; font-size: 12px; line-height: 1.7; }
+.foot { text-align: center; color: #b0b0b0; font-size: 11.5px; margin-top: 20px; line-height: 1.8; }
+.lv { display:inline-block; padding:2px 8px; border-radius:2px; font-size:11.5px;
+  font-weight:600; margin-left:6px; }
+.lv-L1 { background:#eef7f0; color:#2f6b38; }
+.lv-L2 { background:#eef2fa; color:#2b4b8f; }
+.lv-L3 { background:#fdf6e9; color:#8a6c2f; }
+.lv-L4 { background:#f2f2f3; color:#666; }
+.pill { display:inline-block; padding:1px 6px; border-radius:2px; font-size:11px;
+  background:#f7f7f8; color:#666; margin-right:5px; }
+@media (max-width: 640px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  body { padding: 16px 10px 40px; }
+  table { font-size: 12px; }
+}
+/* 定位声明条：行外初筛结果的必要提示，必须显眼但不能喧宾夺主 */
+.notice { background: #fdf7f8; border: 1px solid #f0dde2; border-left: 3px solid #a30030;
+  border-radius: 3px; padding: 9px 12px; font-size: 12px; color: #7a4a55;
+  line-height: 1.7; margin-bottom: 10px; }
+.notice b { color: #92022c; }
+.printbtn { position: fixed; right: 18px; bottom: 18px; padding: 8px 14px; font-size: 13px;
+  background: #fff; border: 1px solid #d8d8d8; border-radius: 3px; color: #a30030;
+  cursor: pointer; font-family: inherit; }
+.printbtn:hover { border-color: #a30030; }
+/* 行内网络若访问不了外部站点，可用浏览器直接打印或存为 PDF 传阅 */
+@media print {
+  body { background: #fff; padding: 0; }
+  .wrap { max-width: none; }
+  .printbtn, .thumb { display: none !important; }
+  .card, .head, .opp, table { break-inside: avoid; }
+  .notice { background: #fff; }
+  .foot { color: #888; }
+  @page { margin: 12mm; }
+}
+</style></head>
+<body><div style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><img src="https://shengc-shv.github.io/redchip-penetration/icon.png" alt="" width="512" height="512"></div><div class="wrap" style="--w:980px">
+  <div class="notice"><b>行外公开信息初筛</b> · 本页数据取自公开披露文件与商业工商数据源，仅用于线索发现；涉及客户准入、授信与合规的判断，须以行内渠道数据复核为准。</div>
+
+  <div class="head">
+    <div class="brand">
+      <img src="icon.png" alt="" width="44" height="44">
+      <div>
+        <div class="kicker">全量摸底</div>
+        <h1>结论与方法论修正 <span class="code"></span></h1>
+      </div>
+    </div>
+    <div class="meta" style="margin-top:10px"><a href="../index.html">← 返回站点首页</a></div>
+    
+  </div>
+
+  <div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">生成时间：2026-09-14 08:52（北京时间）｜数据源：港交所披露易官方静态 JSON（全状态 × 板块，免鉴权）<br>⚠️ 行外公开信息初筛，须经行内渠道复核；关系状态公开不可得。</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>一、口径</h2>
+  <ul style="margin:6px 0;padding-left:20px"><li><b>时间</b>：递交日 ≥ 2026-01-01。</li><li><b>状态</b>：只保留 <b>处理中 / 处理中(含PHIP) / 已上市</b>；失效·撤回·被拒绝·被发回等无商机状态已剔除。</li><li><b>地域</b>：<b>不做广东预过滤</b>——广东只是结果表一列 + 一个派生视图。</li><li>结果口径人口：<b>474 家</b>（官方全量去重后按上述口径收窄）。</li></ul>
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>二、注册地（封面页权威口径）</h2>
+  <table><thead><tr><th>注册地</th><th>家数</th><th>占比</th></tr></thead><tbody><tr><td>开曼群岛</td><td>59</td><td>12.4%</td></tr><tr><td>百慕大</td><td>0</td><td>0.0%</td></tr><tr><td>中国(境内)</td><td>396</td><td>83.5%</td></tr><tr><td>香港</td><td>2</td><td>0.4%</td></tr><tr><td>未判定</td><td>17</td><td>3.6%</td></tr></tbody></table>
+<p style='margin:8px 0'>判定方法：申请版本带 <b>Multi-Files 分册目录</b>，只下載 <b>WARNING 封面分册</b>（~110KB / 1 页 / 3-7s，整份 5-11MB / 30-60s），用封面页固定句式判注册地：</p>
+<pre><code>(Incorporated in the Cayman Islands with limited liability)
+(A joint stock company incorporated in the People's Republic of China with limited liability)</code></pre>
+<p style='margin:8px 0'>已上市记录官方清单<b>不含申请版本</b>（applisted 1310 条中含 Application Proof 的为 0），改走 <code>listedco/listconews</code> 招股章程首页。</p>
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>三、⚠️ 方法论修正：旧口径假阳性红筹</h2>
+  <p style='margin:8px 0'>旧 <code>extract_structure</code> 扫整份 PDF 250 页、按「离岸 &gt; 境内 &gt; 香港」取优先级，<b>系统性高估红筹</b>：正文里偶发一处 Cayman 提及即被当作注册地。</p>
+<p style='margin:8px 0'><b>实测反例</b>：<code>id=108344</code>「深圳小阔」封面明写 *A joint stock company incorporated in the People's Republic of China with limited liability*（H 股），旧口径却判「开曼群岛」。</p>
+<p style='margin:8px 0'>对历史已判定的 84 家复核，<b>翻案 18 条</b>（去重后；原表 #7 与 #19 为同一家「廣東真健康醫療科技開發股份有限公司 - B」，已合并；全部「离岸 → 中国境内」）：</p>
+<table><thead><tr><th>#</th><th>企业</th><th>旧口径</th><th>封面口径</th></tr></thead><tbody><tr><td>1</td><td>廣州極飛科技股份有限公司</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>2</td><td>深圳小闊日化股份有限公司</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>3</td><td>廣東天農集團股份有限公司</td><td>百慕大</td><td>中国(境内)</td></tr><tr><td>4</td><td>深圳邁瑞生物醫療電子股份有限公司</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>5</td><td>廣東合捷電器股份有限公司</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>6</td><td>廣東融泰藥業股份有限公司</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>7</td><td>廣東真健康醫療科技開發股份有限公司 - B</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>8</td><td>地上鐵綠色科技（深圳）股份有限公司</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>9</td><td>深圳市豐宜科技集團股份有限公司</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>10</td><td>禮鼎半導體科技（深圳）股份有限公司</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>11</td><td>深圳宏芯宇電子股份有限公司</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>12</td><td>深圳粵十控股股份有限公司 (前稱為深圳粵十數智股份有限公司)</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>13</td><td>深圳市沃客非凡科技股份有限公司</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>14</td><td>深圳歐稅通控股股份有限公司</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>15</td><td>廣東華沿機器人股份有限公司</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>16</td><td>勝宏科技(惠州)股份有限公司</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>17</td><td>廣東領益智造股份有限公司</td><td>开曼群岛</td><td>中国(境内)</td></tr><tr><td>18</td><td>深圳市星源材質科技股份有限公司</td><td>开曼群岛</td><td>中国(境内)</td></tr></tbody></table>
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>四、广东视图</h2>
+  <ul style="margin:6px 0;padding-left:20px"><li><b>名称通道 86 家</b>：境内注册（H 股）申请人中文名直接含地名（境内注册共 396 家）。</li><li><b>正文通道 38 家</b>：离岸壳名不含地名，靠「概要·公司资料」分册的广东城市词线索检出（离岸注册共 59 家）。</li><li><b>广东并集 124 家</b>。未检出 ≠ 非广东：可能运营实体不在粤、分册未陈述或词频低于阈值。</li></ul>
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>五、红筹视图 · 广东红筹候选</h2>
+  <p style='margin:8px 0'>离岸注册（全部开曼）<b>59 家</b>——旧「名称预筛」一家都框不到，正是被漏掉的那批。其中检出广东运营线索 <b>38 家</b>（核心 25 / 补充 13）：</p>
+<ul style="margin:6px 0;padding-left:20px"><li><b>核心</b>：命中「概要 / 公司资料」章，企业自述总部或运营实体在粤（高置信）；</li><li><b>补充</b>：仅命中「历史沿革」章（该章含股东/投资方/中介地址，噪音高，低置信，须逐家复核）。</li></ul>
+<table><thead><tr><th>#</th><th>企业</th><th>注册地</th><th>线索层级</th><th>广东线索词频</th><th>词频构成</th><th>状态</th></tr></thead><tbody><tr><td>1</td><td>Growatt Technology Co., Ltd</td><td>开曼群岛</td><td>核心</td><td>185</td><td>shenzhen×139, guangdong×13, qingyuan×10, huizhou×8</td><td>处理中</td></tr><tr><td>2</td><td>聖火科技集團有限公司</td><td>开曼群岛</td><td>核心</td><td>170</td><td>guangdong×142, guangzhou×28</td><td>处理中</td></tr><tr><td>3</td><td>錢大媽國際控股有限公司</td><td>开曼群岛</td><td>核心</td><td>149</td><td>guangzhou×84, shenzhen×43, guangdong×12, zhuhai×7</td><td>处理中</td></tr><tr><td>4</td><td>Yueyuan Group Holdings Company Limited</td><td>开曼群岛</td><td>核心</td><td>120</td><td>shenzhen×98, zhuhai×13, guangdong×8, huizhou×1</td><td>处理中</td></tr><tr><td>5</td><td>麓鵬製藥有限公司 - B</td><td>开曼群岛</td><td>核心</td><td>102</td><td>guangzhou×71, shenzhen×26, guangdong×5</td><td>处理中</td></tr><tr><td>6</td><td>Hope Sea Inc.</td><td>开曼群岛</td><td>核心</td><td>81</td><td>shenzhen×75, guangdong×5, zhuhai×1</td><td>处理中</td></tr><tr><td>7</td><td>TOP TOY International Group Limited</td><td>开曼群岛</td><td>核心</td><td>78</td><td>guangzhou×33, dongguan×15, guangdong×12, shenzhen×12</td><td>处理中</td></tr><tr><td>8</td><td>拉拉科技控股有限公司 - W</td><td>开曼群岛</td><td>核心</td><td>76</td><td>shenzhen×61, guangzhou×9, guangdong×1, zhuhai×1</td><td>处理中</td></tr><tr><td>9</td><td>Casstime Holdings Ltd.</td><td>开曼群岛</td><td>核心</td><td>74</td><td>shenzhen×68, guangzhou×4, zhuhai×2</td><td>处理中</td></tr><tr><td>10</td><td>Immvira Bioscience Inc. - B</td><td>开曼群岛</td><td>核心</td><td>57</td><td>shenzhen×56, zhuhai×1</td><td>处理中</td></tr><tr><td>11</td><td>Radvance Cayman Limited</td><td>开曼群岛</td><td>核心</td><td>49</td><td>shenzhen×44, zhuhai×3, guangdong×1, guangzhou×1</td><td>处理中</td></tr><tr><td>12</td><td>Axbio International Limited - B</td><td>开曼群岛</td><td>核心</td><td>49</td><td>shenzhen×30, shantou×12, guangdong×4, zhuhai×3</td><td>处理中</td></tr><tr><td>13</td><td>Aqara International Ltd</td><td>开曼群岛</td><td>核心</td><td>43</td><td>shenzhen×43</td><td>处理中</td></tr><tr><td>14</td><td>FJD Inc.</td><td>开曼群岛</td><td>核心</td><td>40</td><td>shenzhen×22, guangdong×14, foshan×4</td><td>处理中</td></tr><tr><td>15</td><td>Xiaoe Inc.</td><td>开曼群岛</td><td>核心</td><td>38</td><td>shenzhen×33, guangdong×2, zhuhai×2, guangzhou×1</td><td>处理中</td></tr><tr><td>16</td><td>Exegenesis Bio Inc. - B</td><td>开曼群岛</td><td>核心</td><td>35</td><td>guangzhou×26, guangdong×6, shenzhen×3</td><td>处理中</td></tr><tr><td>17</td><td>XREAL Ltd.</td><td>开曼群岛</td><td>核心</td><td>34</td><td>shenzhen×32, zhuhai×2</td><td>处理中</td></tr><tr><td>18</td><td>Eccogene Inc. - B</td><td>开曼群岛</td><td>核心</td><td>34</td><td>zhuhai×16, shenzhen×11, guangzhou×7</td><td>处理中</td></tr><tr><td>19</td><td>隨手播集團公司</td><td>开曼群岛</td><td>核心</td><td>33</td><td>guangzhou×16, guangdong×9, zhuhai×6, huizhou×2</td><td>处理中</td></tr><tr><td>20</td><td>SmartMore Inc.</td><td>开曼群岛</td><td>核心</td><td>31</td><td>shenzhen×29, guangdong×2</td><td>处理中</td></tr><tr><td>21</td><td>Elpiscience Biopharmaceuticals, Inc. - B</td><td>开曼群岛</td><td>核心</td><td>30</td><td>guangzhou×24, guangdong×4, shenzhen×2</td><td>处理中</td></tr><tr><td>22</td><td>環球園藝有限公司</td><td>开曼群岛</td><td>核心</td><td>21</td><td>huizhou×18, shenzhen×2, guangdong×1</td><td>处理中</td></tr><tr><td>23</td><td>暖哇洞察科技有限公司</td><td>开曼群岛</td><td>核心</td><td>14</td><td>guangzhou×7, shenzhen×6, zhongshan×1</td><td>处理中</td></tr><tr><td>24</td><td>安聯國際控股有限公司</td><td>开曼群岛</td><td>核心</td><td>13</td><td>guangzhou×11, guangdong×2</td><td>处理中</td></tr><tr><td>25</td><td>中旅港澳文旅控股有限公司</td><td>开曼群岛</td><td>核心</td><td>3</td><td>shenzhen×2, zhuhai×1</td><td>处理中</td></tr><tr><td>26</td><td>真實生物科技有限公司 - B</td><td>开曼群岛</td><td>补充</td><td>35</td><td>shenzhen×31, jiangmen×3, guangdong×1</td><td>处理中</td></tr><tr><td>27</td><td>Huge Dental Limited</td><td>开曼群岛</td><td>补充</td><td>25</td><td>guangzhou×15, shenzhen×8, heyuan×2</td><td>处理中</td></tr><tr><td>28</td><td>岸邁生物科技有限公司 - B</td><td>开曼群岛</td><td>补充</td><td>11</td><td>zhuhai×10, shenzhen×1</td><td>处理中</td></tr><tr><td>29</td><td>米多多集團股份有限公司</td><td>开曼群岛</td><td>补充</td><td>8</td><td>shenzhen×8</td><td>处理中</td></tr><tr><td>30</td><td>巴奴国际控股有限公司</td><td>开曼群岛</td><td>补充</td><td>8</td><td>shenzhen×5, dongguan×2, guangzhou×1</td><td>处理中</td></tr><tr><td>31</td><td>明宇制药有限公司 - B</td><td>开曼群岛</td><td>补充</td><td>8</td><td>shenzhen×8</td><td>处理中</td></tr><tr><td>32</td><td>微脉公司</td><td>开曼群岛</td><td>补充</td><td>6</td><td>zhuhai×6</td><td>处理中</td></tr><tr><td>33</td><td>長宏新材集團有限公司</td><td>开曼群岛</td><td>补充</td><td>6</td><td>shenzhen×3, guangdong×3</td><td>处理中</td></tr><tr><td>34</td><td>Yusheng Holdings Limited</td><td>开曼群岛</td><td>补充</td><td>6</td><td>guangzhou×2, guangdong×2, shenzhen×1, dongguan×1</td><td>处理中</td></tr><tr><td>35</td><td>米連科技有限公司</td><td>开曼群岛</td><td>补充</td><td>5</td><td>shenzhen×5</td><td>处理中</td></tr><tr><td>36</td><td>Megatronix Inc.</td><td>开曼群岛</td><td>补充</td><td>5</td><td>shenzhen×5</td><td>处理中</td></tr><tr><td>37</td><td>太合音樂集團</td><td>开曼群岛</td><td>补充</td><td>4</td><td>guangzhou×2, shenzhen×2</td><td>处理中</td></tr><tr><td>38</td><td>Yangtuo Holdings Inc.</td><td>开曼群岛</td><td>补充</td><td>4</td><td>guangdong×2, shenzhen×1, zhuhai×1</td><td>处理中</td></tr></tbody></table>
+<div style="background:#fafafa;border-left:3px solid #d9d9d9;border-radius:2px;padding:10px 13px;margin:10px 0;font-size:13px;color:#555">详见 <code>output/redchip_gd_evidence_cards.md</code>（逐家原文摘句复核卡）。</div>
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>六、VIE（协议控制）</h2>
+  <ul style="margin:6px 0;padding-left:20px"><li>全量判定 <b>474 家</b>：否 440 家；否(仅历史安排) 19 家；待核验 11 家；是 4 家。</li><li>分册权威性规则：港交所招股书若上市主体<b>当前</b>存在 VIE，必在「概要」与「风险因素」章披露；只在「历史沿革」章出现的多属<b>已终止的历史安排</b>（实测 Aqara 的 VIE 于 2022 / 2026-03 终止），此类记为「否（仅历史安排）」而不计为 VIE。</li><li>口径收严：只认 <code>variable interest entity</code> / <code>VIE</code> / <code>协议控制</code>；旧口径的裸词 <code>contractual arrangements</code> 已弃用（会把普通商务合同误当 VIE）。</li><li><b>边界</b>：VIE 只描述控制方式，<b>不参与地域判定</b>。</li></ul>
+</div>
+<div class="card">
+  <h2 style="margin-top:0"><span class="bar"></span>七、已知局限（勿掩盖）</h2>
+  <ul style="margin:6px 0;padding-left:20px"><li>秘密递表者官方不刊发申请版本 → 官方源固有盲区，非流程缺陷。</li><li>运营实体地域由分册词频推断，<b>仅为线索</b>；须逐家复核原文（证据卡已备）。</li><li>未判定注册地者同时缺地域与 VIE 结论。</li><li>中文版 PDF 经 pypdf 为 CID 乱码 → 只用英文分册。</li><li>关系状态（是否开户/他行锁定）公开不可得，须行内 CRM 回填。</li></ul>
+</div>
+
+  <div class="foot">
+    数据来源：港交所披露易公开申请版本（Multi-Files 分册）· 由红筹架构穿透系统自动抽取<br>
+    事实性陈述均标注来源分册，可逐条回溯原文；具体数字需业务部门另行核实
+  </div>
+  <button class="printbtn" onclick="window.print()">打印 / 存为 PDF</button>
+</div>
+
+</body></html>
