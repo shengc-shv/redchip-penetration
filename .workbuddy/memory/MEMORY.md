@@ -24,7 +24,38 @@ UBO 识别与解读。GitHub Actions 运行，无需服务器。
 代码里的降级开关：`cnbiz.py` 中 `self.mock = settings.redchip_mock or not cnbizapi_key`。
 
 ## 硬性约定
-- **时区**：唯一常量 `redchip.config.CST`（Asia/Shanghai）。禁止无时区 `datetime.now()`、禁止 env 覆盖。
+- **⚠️ 注册地判定只认「封面页权威口径」**（2026-09-13 实锤修正）：上市主体注册地**只由申请版本/招股章程
+  封面页（扉页）固定句式**给出（`Incorporated in the Cayman Islands with limited liability` /
+  `A joint stock company incorporated in the People's Republic of China with limited liability`）。
+  **严禁**扫整份 PDF 收集法域命中后按「离岸 > 境内 > 香港」取优先级——会把正文里偶发的 Cayman 提及
+  （股东/子公司/法域描述）当注册地，实测造成 **19 条假阳性红筹**（广州极飞/深圳迈瑞/惠州胜宏… 实为 H 股）。
+  实现见 `src/redchip/overseas/hkex_cover.py`；关键坑：pypdf 会在词内插空格 + 弯引号，须先「紧凑化」再匹配。
+- **⚠️ 全量摸底口径**（用户 2026-09-13 拍板）：「全量」= **2026 年以来**且状态 ∈ {处理中, 处理中(含PHIP), 已上市}；
+  失效/撤回/被拒绝/被发回一律剔除。**不做广东预过滤**——广东只是结果表一列 + 一个派生视图，
+  不得作为闸门（`mark_guangdong` 仅可标列，不可过滤）。
+- **⚠️ 广东地名词库为单一权威表**（2026-09-13 审计+重构）：唯一来源
+  `hkex_listing._GD_CITY_TABLE`（简体/繁体/拼音三元组，21 个地级市 + 顺德 + 省名）；
+  `_GD_CITIES_CN`（=简繁两写法）、`_GD_CITIES_EN`（拼音）、`hkex_cover._GD_TOKENS` 三者**均从该表派生**，
+  **禁止再写第二份清单**（曾因 `hkex_cover` 硬编码副本导致漂移风险）。
+  繁体必须收录：港交所中文名一律繁体，只收简体时「繁体粤地名 + 英文壳名」必漏。
+  区级/开发区地名（南山/前海/横琴/南沙/松山湖）与历史拼写（Canton/Swatow/Teochew）**刻意不收录**，
+  理由见 `output/筛选条件_广东红筹.md`。单测 `tests/test_guangdong.py` 锁死 21 市覆盖。
+- **⚠️ 广东线索分「核心/补充」两层**（2026-09-13）：「核心」= 命中 `SUMMARY`/`CORPORATE INFORMATION`
+  （公司自述总部/运营实体/主要银行）；「补充」= 仅命中 `HISTORY`（该章含股东/投资方/中介地址，噪音高）。
+  对外默认用核心口径（阈值 3 下核心 20 家 + 补充 7 家）。实现 `_gd_tier()`。
+- **⚠️ 披露易分册名有变体**：`HISTORY, DEVELOPMENT AND...` 与 `HISTORY, REORGANIZATION AND...`
+  → 匹配分册一律用**前缀** `"HISTORY"`，勿写死全名（曾导致 REORGANIZATION 变体的历史沿革章从未被扫）。
+- **⚠️ 广东线索扫描的两个致命参数（2026-09-14 Exegenesis 复核实锤）**：
+  ① **分册页数预算必须分册差异化**——「历史沿革」章的重组叙事 / 重大子公司表在**百余页之后**，
+  统一 `max_pages=10` 会把证据整段漏读（实测 Exegenesis 的广州嘉因在第 114–133 页，词频被低估 5 vs 实际 35）。
+  现行 `hkex_cover._OPCO_SECTION_PAGES = {SUMMARY:12, CORPORATE INFORMATION:12, HISTORY:60}`。
+  ② **「历史沿革」章不能一刀切当噪音**——它同时是重组叙事的唯一出处；用 `_GROUP_ENTITY_RE` /
+  `_entity_context_hits()` 判「集团自述实体」句（`our subsidiary` / `wholly-owned` / `operating entity` /
+  `our Group`），落到字段 `gd_opco_entity_count`，≥3 归 `核心(沿革章·实体内述)`。
+  **勿用裸词 `\bGroup\b`**（会命中第三方名称，如「Guangzhou Finance Holding Group Co., Ltd.」）。
+- **⚠️ 判层统计勿用精确匹配**：`_gd_tier(r) == "核心"` 会把 `核心(沿革章·实体内述)` 整层漏掉，须用 `.startswith("核心")`。
+- **时区**：唯一常量 `redchip.config.CST`（Asia/Shanghai）。禁止无时区 `datetime.now()`、禁止 env 覆盖；
+  **`config` 没有 `now_cst()`**，全项目写法是 `dt.datetime.now(config_mod.CST)`。
 - **LLM 调用点只有两个**：`llm_a`（架构提取）与 `llm_b`（审查+报告）。
 - **地域过滤必须在 LLM-A 之后**（先全量候选消歧再过滤），默认广东省，可按目标覆盖。
 - **披露时间只取官方字段**（HKEX `DATE_TIME`、SEC `filingDate`），**不得用抓取日兜底**。
@@ -39,6 +70,25 @@ UBO 识别与解读。GitHub Actions 运行，无需服务器。
 - 交叉验证（披露↔工商）：`verify/crosscheck.py`、`verify/shareholders.py`（中英双通道）
 - 美股 HTML 表格解析（Item 7）：`overseas/htmltable.py`
 - 红筹判定口径：注册地+上市地均在境外即为红筹；按控制人分国资/民营，按控制方式分股权/协议（VIE）。
+
+## gh-pages 站点约定（2026-09-14 改版后）
+站点：<https://shengc-shv.github.io/redchip-penetration/>（gh-pages 分支，**已 .nojekyll**）。生成器 `scripts/make_site.py`。
+- **布局**（用户拍板）：**根 `index.html` = 导航首页**，且用户 2026-09-14 明确要求**极简**——
+  只保留「① 企业红筹架构分析报告」一张表（腾讯控股会前简报置**首行**并打标「样例」），
+  全量摸底文档不在首页展开，仅页脚留批次目录入口；新产出统一放**按日期的批次目录 `<YYYY-MM-DD>/`**；
+  腾讯控股页移入 `sample/` 并**打标「样例」**（页首横幅 + `<title>` 前缀）。
+- **企业报告板块 = 腾讯「会前简报」4 板块**：① 一页画像 ② 触点地图：钱在哪里、谁做决策 ③ 商机矩阵
+  ④ 干系人作战表（首战切入点）。这是用户 2026-09-14 明确选定（另一套「穿透报告」章节仅作附录 `*_detail.html`）。
+- **⚠️ 简报数据必须数据驱动**：`make_brief.render_deck()` 的 ② 触点地图**写死了穿透流水线的五行**
+  （境外股东层/离岸层/境内 WFOE/VIE 运营实体/个人层），照搬会对「无 VIE / 只有非法人团队」的企业产出**事实错误**。
+  正解：数据放 `scripts/brief_data.py`，由 `make_site.render_brief()` 按同款版式渲染。
+- **风格一致性可量化**：新简报页与腾讯页 **CSS 逐字节相同**（`make_brief.CSS`）；DOM 骨架元素/class 词汇一致，
+  仅数据行数不同。改版后请复跑该比对。
+- **优先级色阶**：商机矩阵 a/b/c，另有 `n` = 「待核验·需先落主体」（复用既有 `.tag.n`）。
+- 子目录**各存一份 `icon.png`**（页内 `<img src="icon.png">` 是相对路径，不复制会裂图）。
+- **发布流程**：`git worktree add --detach /tmp/ghp-push gh-pages` → 清空旧页 → 复制 `output/site/` →
+  commit → `git push origin HEAD:gh-pages` → `worktree remove` + `git fetch origin gh-pages:gh-pages`。
+  **远程推送须用户明确授权**（红线）；`git remote -v` 输出含凭据会触发敏感信息拦截，**不要打印远程地址**。
 
 ## 境内工商数据源（适配器架构）
 - 实现位于 `src/redchip/domestic/sources/`：`base.py`（协议 + 共享工具）/ `cnbizapi.py` /
