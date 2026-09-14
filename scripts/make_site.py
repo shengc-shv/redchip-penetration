@@ -567,6 +567,8 @@ def main() -> None:
     out_dir = settings.redchip_output_dir
     site = out_dir / "site"
     site.mkdir(parents=True, exist_ok=True)
+    # gh-pages 站点为纯静态 HTML，写 .nojekyll 阻止 GitHub Pages 走 Jekyll 处理
+    (site / ".nojekyll").write_text("", encoding="utf-8")
 
     batch = args.batch or dt.datetime.now(config_mod.CST).strftime("%Y-%m-%d")
     batch_dir = site / batch
